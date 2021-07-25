@@ -19,7 +19,7 @@ This script is very much a work-in-progress. It is easy to select a set of param
 * [Install the Blender 2.93.x LTS Application](https://www.blender.org/download/lts/2-93/)
 
 **Load Script**
-* Open Blender and delete the start cube
+* Open Blender and delete the initial objects (i.e., Camera, Cube, & Light)
 * Switch to the Scripting Window
 * Either Copy-Paste the code into a new file *or* load [src/blended-dm.py](src/blended-dm.py)
 * *Optional:* Open Console Window to observe output
