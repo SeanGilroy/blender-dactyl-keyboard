@@ -152,99 +152,54 @@ ameoba_width = 16.5
 ameoba_thickness = 3
 
 for size in [1, 1.5]:
-    # CREATE keycap_projection_outer_***u TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, mount_thickness + 4 + 2), scale=(19, 19*size, 8))
-    bpy.context.selected_objects[0].name = "keycap_projection_outer_" + str(size) + "u"
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
-    # CREATE keycap_projection_inner_***u TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, mount_thickness + 4 + 2 - 2), scale=(19+2, 19*size+2, 8))
-    bpy.context.selected_objects[0].name = "keycap_projection_inner_" + str(size) + "u"
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    
-    # CREATE switch_projection_***u TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 5*mount_thickness-1), scale=((mount_width), mount_height*size,  10*mount_thickness))
-    bpy.context.selected_objects[0].name = "switch_projection_" + str(size) + "u"
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    bpy.ops.mesh.select_all(action='DESELECT')
-    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-    grid_mesh.verts.ensure_lookup_table()
-    for vertex in [0, 2, 4, 6]:
-        grid_mesh.verts[vertex].select = True
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-    bpy.data.objects["switch_projection_" + str(size) + "u"].vertex_groups['Group'].name = 'bottom_project'
-
-    # CREATE switch_projection_inner_***u TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 5*mount_thickness-1), scale=((mount_width+1.8), mount_height*size+1.8, 10*mount_thickness))
-    bpy.context.selected_objects[0].name = "switch_projection_inner_" + str(size) + "u"
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    bpy.ops.mesh.select_all(action='DESELECT')
-    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-    grid_mesh.verts.ensure_lookup_table()
-    for vertex in [0, 2, 4, 6]:
-        grid_mesh.verts[vertex].select = True
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-    bpy.data.objects["switch_projection_inner_" + str(size) + "u"].vertex_groups['Group'].name = 'bottom_project'
-    
-    # CREATE switch_projection_inner__bottom***u TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 0), scale=(keyswitch_width, keyswitch_height, 2.1*mount_thickness))
-    bpy.context.selected_objects[0].name = "switch_hole_" + str(size) + "u"
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True) 
-    
-    # CREATE ameoba_cut_***u TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, -ameoba_thickness/2-0.1), scale=(ameoba_width, ameoba_height, ameoba_thickness))
-    bpy.context.selected_objects[0].name = "ameoba_cut_" + str(size) + "u"
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
-    # CREATE side_nub TOOL
-    bpy.ops.mesh.primitive_cube_add(size=1, location=((1.5 / 2) + 0.5*(keyswitch_width-0.01), 0, 0.5*mount_thickness), scale=(1.5, 2.75, mount_thickness - 0.01))
-    bpy.context.selected_objects[0].name = "nub_cube"
-    bpy.ops.mesh.primitive_cylinder_add(vertices=50, radius=1.0 - 0.005, depth=2.75, location=(keyswitch_width / 2, 0, 1), rotation=(pi / 2, 0, 0))
-    bpy.context.selected_objects[0].name = "switch_support_" + str(size) + "u"
-
-    bpy.data.objects['nub_cube'].select_set(True)
-    bpy.ops.object.join()
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    bpy.ops.mesh.convex_hull()
-    bpy.ops.mesh.dissolve_limited(angle_limit=radians(5))
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
-
-    bpy.ops.object.modifier_add(type='MIRROR')
-    bpy.ops.object.modifier_apply(modifier="Mirror")
-
-
-
-for size in [1, 1.5]:
+    for shape in [['switch_projection', (0, 0, 5*mount_thickness-1), (mount_width, mount_height*size,  10*mount_thickness)],
+                  ['switch_projection_inner', (0, 0, 5*mount_thickness-1), (mount_width+1.8, mount_height*size+1.8, 10*mount_thickness)],
+                  ['keycap_projection_outer', (0, 0, mount_thickness + 4 + 2), (19, 19*size, 8)],
+                  ['keycap_projection_inner', (0, 0, mount_thickness + 4 + 2 - 2), (19+2, 19*size+2, 8)],
+                  ['switch_hole', (0, 0, 0), (keyswitch_width, keyswitch_height, 2.1*mount_thickness)],
+                  ['ameoba_cut', (0, 0, -ameoba_thickness/2-0.1), (ameoba_width, ameoba_height, ameoba_thickness)],
+                  ['nub_cube', ((1.5 / 2) + 0.5*(keyswitch_width-0.01), 0, 0.5*mount_thickness), (1.5, 2.75, mount_thickness - 0.01)]]:
+        
+        bpy.ops.mesh.primitive_cube_add(size=1, location=shape[1], scale=shape[2])
+        bpy.context.selected_objects[0].name = shape[0] + "_" + str(size) + "u"
+        
+        if shape[0] in ['switch_projection', 'switch_projection_inner']:
+            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+            grid_mesh.verts.ensure_lookup_table()
+            for vertex in [0, 2, 4, 6]:
+                grid_mesh.verts[vertex].select = True
+            bpy.ops.object.vertex_group_assign_new()
+            bpy.ops.mesh.select_all(action='SELECT')
+            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.data.objects[shape[0] + "_" + str(size) + "u"].vertex_groups['Group'].name = 'bottom_project'
+        
+        elif shape[0] in ['nub_cube']:
+            bpy.ops.mesh.primitive_cylinder_add(vertices=50, radius=1.0 - 0.005, depth=2.75, location=(keyswitch_width / 2, 0, 1), rotation=(pi / 2, 0, 0))
+            bpy.context.selected_objects[0].name = "switch_support_" + str(size) + "u"
+            bpy.data.objects[shape[0] + "_" + str(size) + "u"].select_set(True)
+            bpy.ops.object.join()
+            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.mesh.convex_hull()
+            bpy.ops.mesh.dissolve_limited(angle_limit=radians(5))
+            bpy.ops.object.mode_set(mode = 'OBJECT')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
+            bpy.ops.object.modifier_add(type='MIRROR')
+            bpy.ops.object.modifier_apply(modifier="Mirror")
+            
     bpy.context.view_layer.objects.active = bpy.data.objects["switch_hole_" + str(size) + "u"]
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    '''
-    if (switch_support):
-        bpy.context.view_layer.objects.active = bpy.data.objects["switch_hole_" + str(size) + "u"]
-        bpy.ops.object.modifier_add(type='BOOLEAN')
-        bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["switch_support_" + str(size) + "u"]
-        bpy.ops.object.modifier_apply(modifier="Boolean")
-    '''
+    
     if (ameoba_cut):
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["ameoba_cut_" + str(size) + "u"]
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
-
-# Clean up tools
-bpy.ops.object.select_all(action='DESELECT')
-for size in [1, 1.5]:
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.data.objects["ameoba_cut_" + str(size) + "u"].select_set(True)
-with suppress_stdout(): bpy.ops.object.delete()
-
+    with suppress_stdout(): bpy.ops.object.delete()
 
 
 
