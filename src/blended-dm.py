@@ -338,7 +338,7 @@ print("{:.2f}".format(time.time()-start_time), "- Generate Finger Plate")
 
 bpy.ops.mesh.primitive_grid_add(x_subdivisions=2*nrows-1, y_subdivisions=2*ncols-1, size=1, enter_editmode=False, align='WORLD', location=(0, 0, mount_thickness), rotation=(0, 0, 0))
 bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((0.999957, 0.00930767, -2.34926e-07), (-0.00842174, 0.904788, 0.425779), (0.00396323, -0.425761, 0.904827)), orient_matrix_type='VIEW', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-#print(xyz)
+
 bpy.ops.transform.resize(value=((2*ncols-1)/1000, (2*nrows-1)/1000, 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
 bpy.context.selected_objects[0].name = "finger_plate"          
@@ -1683,19 +1683,8 @@ if magnet_bottom:
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 
     bpy.ops.object.select_all(action='DESELECT')
-    bpy.data.objects['mag_0'].select_set(True)
-    bpy.data.objects['mag_1'].select_set(True)
-    bpy.data.objects['mag_2'].select_set(True)
-    bpy.data.objects['mag_3'].select_set(True)
-    bpy.data.objects['mag_4'].select_set(True)
-    bpy.data.objects['mag_5'].select_set(True)
-    bpy.data.objects['mag_template'].select_set(True)
-    bpy.data.objects['mag_h_template'].select_set(True)
-    bpy.data.objects['mag_h'].select_set(True)
-    bpy.data.objects['maghole'].select_set(True)
-    bpy.data.objects['mag_template'].select_set(True)
-    bpy.data.objects['mag_h_template_rib'].select_set(True)
-    bpy.data.objects['mag_h_curve'].select_set(True)
+    for object in ['mag_0', 'mag_1', 'mag_2', 'mag_3', 'mag_4', 'mag_5', 'mag_template', 'mag_h_template', 'mag_h', 'maghole', 'mag_template', 'mag_h_template_rib', 'mag_h_curve']:
+        bpy.data.objects[object].select_set(True)
     with suppress_stdout(): bpy.ops.object.delete()
 
 
@@ -1746,22 +1735,10 @@ print("{:.2f}".format(time.time()-start_time), "- Clean Up")
 
 bpy.ops.object.select_all(action='DESELECT')
 
-for thing in bpy.data.collections['AXIS'].objects:
-    thing.select_set(True)
-with suppress_stdout(): bpy.ops.object.delete()
-bpy.data.collections.remove(bpy.data.collections['AXIS'])
-
-for thing in bpy.data.collections['SWITCH_SUPPORT'].objects:
-    thing.select_set(True)
-with suppress_stdout(): bpy.ops.object.delete()
-bpy.data.collections.remove(bpy.data.collections['SWITCH_SUPPORT'])
-
-for thing in bpy.data.collections['SWITCH_HOLE'].objects:
-    thing.select_set(True)
-with suppress_stdout(): bpy.ops.object.delete()
-bpy.data.collections.remove(bpy.data.collections['SWITCH_HOLE'])
-
-for collection in ['SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER']:
+for collection in ['AXIS', 'SWITCH_SUPPORT', 'SWITCH_HOLE', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER']:
+    for thing in bpy.data.collections[collection].objects:
+        thing.select_set(True)
+    with suppress_stdout(): bpy.ops.object.delete()
     bpy.data.collections.remove(bpy.data.collections[collection])
 
 print("{:.2f}".format(time.time()-start_time), "- DONE")
