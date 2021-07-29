@@ -29,9 +29,7 @@ bpy.context.scene.unit_settings.scale_length = 1
 bpy.context.scene.unit_settings.length_unit = 'MILLIMETERS'
 bpy.context.scene.cursor.location =  [0, 0, 0]
 bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
-
 bpy.ops.preferences.addon_enable(module='mesh_tools')
-bpy.ops.preferences.addon_enable(module='object_boolean_tools')
 bpy.ops.preferences.addon_enable(module='object_print3d_utils')
 
 start_time = time.time()
@@ -100,12 +98,12 @@ relaxed_mesh = True
 switch_support = True
 loligagger_port = True
 wide_pinky = True
-ameoba_cut = False               # May cause holes in case walls. Possible fix is to increase wall_xy_offset
-hot_swap = False                 # Unused Currently
+ameoba_cut = False                # May cause holes in case walls. Possible fix is to increase wall_xy_offset
+hot_swap = False                  # Unused Currently
 magnet_bottom = True             
 magnet_diameter = 6.2
 magnet_height = 2.2
-bottom_thickness = 3            # Thickness of Bottom Plate
+bottom_thickness = 3              # Thickness of Bottom Plate
 
 
 
@@ -134,11 +132,10 @@ for collection in ["AXIS", "KEYCAP_PROJECTION_OUTER", "KEYCAP_PROJECTION_INNER",
 
 print("\n\n{:.2f}".format(time.time()-start_time), "- Initializing Tool Shapes")
 
-# CREATE AXIS TOOL
+
 bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
 bpy.context.selected_objects[0].name = "key_axis"
 bpy.ops.object.transform_apply(location=True, rotation=False, scale=True)
-
 
 keyswitch_height = 14.4
 keyswitch_width = 14.4
@@ -1324,7 +1321,6 @@ bpy.ops.object.vertex_group_assign_new()
 bpy.data.objects['bottom'].vertex_groups['Group'].name = 'bottom_upper'
 bpy.ops.mesh.edge_face_add()
 bpy.ops.mesh.normals_make_consistent(inside=False)
-
 bpy.ops.object.mode_set(mode = 'OBJECT')
 
 bpy.ops.object.modifier_add(type='SHRINKWRAP')
