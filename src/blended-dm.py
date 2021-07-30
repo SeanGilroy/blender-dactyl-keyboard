@@ -1052,7 +1052,7 @@ with suppress_stdout(): bpy.ops.object.delete()
 
 if loligagger_port:
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(bpy.data.objects['axis - 0, 0'].location[0] - sin(bpy.data.objects['axis - 0, 0'].rotation_euler[0])*mount_width*0.5, 100+bpy.data.objects['axis - ' + str(nrows) + ', 0'].location[1], 0), scale=(1, 1, 1))
+        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(bpy.data.objects['axis - 0, 0'].location[0] - sin(bpy.data.objects['axis - 0, 0'].rotation_euler[0])*mount_width*0.5, 100+bpy.data.objects['axis - ' + str(nrows-1) + ', 0'].location[1], 0), scale=(1, 1, 1))
         bpy.context.active_object.name = 'holder_projection'
         bpy.ops.object.modifier_add(type='SHRINKWRAP')
         bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
