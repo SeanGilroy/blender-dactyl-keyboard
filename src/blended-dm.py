@@ -351,13 +351,11 @@ with suppress_stdout(): bpy.ops.object.delete()
 
 print("{:.2f}".format(time.time()-start_time), "- Generate Finger Plate")
 
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=2*nrows-1, y_subdivisions=2*ncols-1, size=1, enter_editmode=False, align='WORLD', location=(0, 0, mount_thickness), rotation=(0, 0, 0))
-bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((0.999957, 0.00930767, -2.34926e-07), (-0.00842174, 0.904788, 0.425779), (0.00396323, -0.425761, 0.904827)), orient_matrix_type='VIEW', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-
-bpy.ops.transform.resize(value=((2*ncols-1)/1000, (2*nrows-1)/1000, 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=2*nrows-1, y_subdivisions=2*ncols-1, size=1, rotation=(0, 0, -pi/2))
+bpy.ops.transform.resize(value=(2*ncols-1, 2*nrows-1, 1))
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 bpy.context.selected_objects[0].name = "finger_plate"          
-                
+
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
@@ -372,48 +370,21 @@ grid_mesh.faces.ensure_lookup_table()
 for column in range(ncols):
     for row in range(nrows):
         if (column in [2, 3]) or (not row == lastrow):
-
             
-            if column==ncols-1 and wide_pinky:
-                column_angle = beta * (centercol - column - 0.25)
-            else:
-                column_angle = beta * (centercol - column)
             face_is_a_key.append(row * 2 + column* 2*(2*nrows-1))            
             grid_mesh.faces[face_is_a_key[-1]].select = True
-            
-            if column==ncols-1 and wide_pinky:
-                bpy.ops.transform.resize(value=(1000*(mount_height*1.5 + 0.25), 1000*(mount_width + 0.25), 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-            else:
-                bpy.ops.transform.resize(value=(1000*(mount_height + 0.25), 1000*(mount_width + 0.25), 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-            
-            # Apply transfomations to each key face
-            if (column_style == "standard"):
-                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
-                bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, column_radius))
-                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-                
-            elif (column_style == "orthographic"):
-                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
-                bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                if column==ncols-1 and wide_pinky:
-                    bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-                else:
-                    bpy.ops.transform.translate(value=( (column - centercol)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-            
-            elif (column_style == "cylindrical"):
-                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
-                if column==ncols-1 and wide_pinky:
-                    bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-                else:
-                    bpy.ops.transform.translate(value=( (column - centercol)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-                            
-            bpy.ops.transform.rotate(value=(-tenting_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-            bpy.ops.transform.translate(value=(0, 0, keyboard_z_offset), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-            
-            bpy.ops.transform.translate(value=(0, 0, key_well_offset), orient_type='NORMAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
 
+            switch_size = 1
+            if column==ncols-1 and wide_pinky: switch_size = 1.5
+            bpy.ops.transform.resize(value=(mount_height*switch_size + 0.25, mount_width + 0.25, 1))
+                        
+            bpy.ops.transform.translate(value=-grid_mesh.faces[face_is_a_key[-1]].calc_center_median(), orient_type='GLOBAL')
+            bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
+            
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.translate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].location, orient_type='GLOBAL')
             bpy.ops.mesh.select_all(action='DESELECT')
 
 
@@ -496,27 +467,22 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
 
 
-
 #################
 ## THUMB PLATE ##
 #################
 
 print("{:.2f}".format(time.time()-start_time), "- Generate Thumb Plate")
 
-bpy.ops.object.select_all(action='DESELECT')
+#bpy.ops.object.select_all(action='DESELECT')
 
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=7, size=.1, enter_editmode=False, align='WORLD', location=(0, 0, mount_thickness), rotation=(0, 0, -1.5708))
-bpy.ops.transform.resize(value=(.07, .03, .1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=7, size=1, location=(0, 0, mount_thickness), rotation=(0, 0, -pi/2))
+bpy.ops.transform.resize(value=(7, 3, 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 bpy.context.selected_objects[0].name = "thumb_plate"
+
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
-
-for vertex_group_name in ['key_thumb', 'thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'thumb_corner_TL', 'thumb_corner_TLL', 'thumb_corner_ML', 'thumb_corner_BL', 'thumb_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.data.objects['thumb_plate'].vertex_groups['Group'].name = vertex_group_name
-    
     
 grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
 grid_mesh.verts.ensure_lookup_table()
@@ -529,12 +495,13 @@ faces_to_use = [0, 2, 6, 8, 12, 18]
 # Apply transfomations to each key face
 for thumb in range(len(faces_to_use)):
     grid_mesh.faces[faces_to_use[thumb]].select = True
-                   
-    if (thumb>3):
-        bpy.ops.transform.resize(value=(1000*(mount_height+0.25), 1000*(mount_height*1.5+0.25), 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-    else:
-        bpy.ops.transform.resize(value=(1000*(mount_height+0.25), 1000*(mount_width+0.25), 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-
+    
+    switch_size = 1
+    if thumb>3: switch_size = 1.5               
+    bpy.ops.transform.resize(value=(mount_height+0.25, mount_height*switch_size+0.25, 1))
+    
+    bpy.ops.transform.translate(value=-grid_mesh.faces[faces_to_use[thumb]].calc_center_median(), orient_type='GLOBAL')
+    bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
 
     bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
     bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
@@ -542,10 +509,13 @@ for thumb in range(len(faces_to_use)):
     bpy.ops.transform.translate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
     bpy.ops.transform.translate(value=(0, 0, key_well_offset), orient_type='NORMAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
-
+    
     bpy.ops.mesh.select_all(action='DESELECT')
 
 
+for vertex_group_name in ['key_thumb', 'thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'thumb_corner_TL', 'thumb_corner_TLL', 'thumb_corner_ML', 'thumb_corner_BL', 'thumb_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['thumb_plate'].vertex_groups['Group'].name = vertex_group_name
 
 # Remove unused faces
 grid_mesh.faces.ensure_lookup_table()
