@@ -54,6 +54,7 @@ if nrows > 5:
     column_style = "orthographic"
 else:
     column_style = "standard"
+#column_style = "cylindrical"
 
 
 def column_offset(column: int) -> list:
@@ -255,14 +256,31 @@ for column in range(ncols):
             # Select all tools
             for tool in ['AXIS', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'SWITCH_HOLE', 'SWITCH_SUPPORT']:
                 bpy.data.objects[tool.lower() + tool_identifier].select_set(True)
+            
             # Apply transfomations to each set tools
-            bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
             if (column_style == "standard"):
+                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
                 bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, column_radius))
+                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                
             elif (column_style == "orthographic"):
-                bpy.ops.transform.rotate(value=(column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                bpy.ops.transform.translate(value=( ((column - centercol) * (1 + column_radius * sin(beta))), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-            bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
+                bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                if column==ncols-1 and wide_pinky:
+                    bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                else:
+                    bpy.ops.transform.translate(value=( (column - centercol)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+            
+            elif (column_style == "cylindrical"):
+                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
+                if column==ncols-1 and wide_pinky:
+                    bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                else:
+                    bpy.ops.transform.translate(value=( (column - centercol)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+                
             bpy.ops.transform.rotate(value=(-tenting_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
             bpy.ops.transform.translate(value=(0, 0, keyboard_z_offset), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
@@ -367,19 +385,34 @@ for column in range(ncols):
                 bpy.ops.transform.resize(value=(1000*(mount_height*1.5 + 0.25), 1000*(mount_width + 0.25), 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
             else:
                 bpy.ops.transform.resize(value=(1000*(mount_height + 0.25), 1000*(mount_width + 0.25), 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+            
             # Apply transfomations to each key face
-            bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
             if (column_style == "standard"):
+                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
                 bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, column_radius))
+                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                
             elif (column_style == "orthographic"):
-                bpy.ops.transform.rotate(value=(column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                bpy.ops.transform.translate(value=( ((column - centercol) * (1 + column_radius * sin(beta))), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-            bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
+                bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                if column==ncols-1 and wide_pinky:
+                    bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                else:
+                    bpy.ops.transform.translate(value=( (column - centercol)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+            
+            elif (column_style == "cylindrical"):
+                bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
+                if column==ncols-1 and wide_pinky:
+                    bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                else:
+                    bpy.ops.transform.translate(value=( (column - centercol)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                            
             bpy.ops.transform.rotate(value=(-tenting_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
             bpy.ops.transform.translate(value=(0, 0, keyboard_z_offset), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
             
             bpy.ops.transform.translate(value=(0, 0, key_well_offset), orient_type='NORMAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
-
 
             bpy.ops.mesh.select_all(action='DESELECT')
 
@@ -1052,7 +1085,7 @@ with suppress_stdout(): bpy.ops.object.delete()
 
 if loligagger_port:
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(bpy.data.objects['axis - 0, 0'].location[0] - sin(bpy.data.objects['axis - 0, 0'].rotation_euler[0])*mount_width*0.5, 100+bpy.data.objects['axis - ' + str(nrows-1) + ', 0'].location[1], 0), scale=(1, 1, 1))
+        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(bpy.data.objects['axis - 0, 0'].location[0] - sin(bpy.data.objects['axis - 0, 0'].rotation_euler[0])*mount_width*0.5, 100, 0), scale=(1, 1, 1))
         bpy.context.active_object.name = 'holder_projection'
         bpy.ops.object.modifier_add(type='SHRINKWRAP')
         bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
@@ -1557,7 +1590,7 @@ if magnet_bottom:
                    ['axis - ' + str(ncols-2) + ', ' + str(nrows-2), 'axis - ' + str(ncols-2) + ', ' + str(nrows-2), [radians(-90), 0, 0]],
                    ['axis - thumb - 5',                             'axis - thumb - 5',                             [radians(-90), 0, 0]],
                    ['axis - 0, ' + str(nrows-2),                    'axis - 0, ' + str(nrows-2),                    [0, radians(90), 0] ],
-                   ['axis - ' + str(ncols-1) + ', 0',               'axis - ' + str(ncols-1) + ', ' + str(nrows-2), [0, radians(-90), 0]]]
+                   ['axis - ' + str(ncols-1) + ', 0',               'axis - ' + str(ncols-1) + ', ' + str(nrows-2 - (nrows-1)%2 ), [0, radians(-90), 0]]]
     for item in range(len(magnet_data)):
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.mesh.primitive_plane_add(enter_editmode=False, align='WORLD', location=((bpy.data.objects[magnet_data[item][0]].location[0]+bpy.data.objects[magnet_data[item][1]].location[0])/2, (bpy.data.objects[magnet_data[item][0]].location[1]+bpy.data.objects[magnet_data[item][1]].location[1])/2, 2), rotation=magnet_data[item][2], scale=(1, 1, 1))
@@ -1685,6 +1718,7 @@ if magnet_bottom:
 
 
 
+
 #########################
 ## Create Switch Holes ##
 #########################
@@ -1694,6 +1728,14 @@ print("{:.2f}".format(time.time()-start_time), "- Add Switch Holes")
 bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 bpy.data.objects['body'].select_set(True)
 
+bpy.ops.object.modifier_add(type='BOOLEAN')
+bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE"]
+bpy.ops.object.modifier_apply(modifier="Boolean")
+
+
+'''
 for thing in bpy.data.collections['SWITCH_HOLE'].objects:
     print("   ---" + thing.name)
     bpy.ops.object.modifier_add(type='BOOLEAN')
@@ -1701,7 +1743,7 @@ for thing in bpy.data.collections['SWITCH_HOLE'].objects:
     #bpy.context.object.modifiers["Boolean"].use_self = True
     bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
     bpy.ops.object.modifier_apply(modifier="Boolean")
-
+'''
 
 
 #########################
@@ -1714,12 +1756,20 @@ if switch_support:
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
     bpy.data.objects['body'].select_set(True)
     
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+    bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_SUPPORT"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    '''
     for thing in bpy.data.collections['SWITCH_SUPPORT'].objects:
         print("   ---" + thing.name)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = thing
         bpy.ops.object.modifier_apply(modifier="Boolean")
+    '''
 
 
 
