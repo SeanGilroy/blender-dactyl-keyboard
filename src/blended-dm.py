@@ -373,6 +373,9 @@ for column in range(ncols):
             
             face_is_a_key.append(row * 2 + column* 2*(2*nrows-1))            
             grid_mesh.faces[face_is_a_key[-1]].select = True
+            
+            bpy.ops.object.vertex_group_assign_new()
+            bpy.data.objects['finger_plate'].vertex_groups['Group'].name = 'switch - '+ str(column) + ', ' + str(row)
 
             switch_size = 1
             if column==ncols-1 and wide_pinky: switch_size = 1.5
@@ -495,6 +498,9 @@ faces_to_use = [0, 2, 6, 8, 12, 18]
 # Apply transfomations to each key face
 for thumb in range(len(faces_to_use)):
     grid_mesh.faces[faces_to_use[thumb]].select = True
+    
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['thumb_plate'].vertex_groups['Group'].name = 'switch - thumb - ' + str(thumb)
     
     switch_size = 1
     if thumb>3: switch_size = 1.5               
@@ -948,37 +954,60 @@ for projection_type in [['body',       'keycap_projection_outer', mount_thicknes
         bpy.ops.object.select_all(action='DESELECT')
         bpy.context.view_layer.objects.active = bpy.data.objects[projection_type[0]]
         bpy.data.objects[projection_type[0]].select_set(True)
+        
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.vertex_group_set_active(group='switch' + thing.name[len(projection_type[1]):])
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_more()
+        bpy.ops.mesh.separate(type='SELECTED')
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects[projection_type[0] + ".001"]
+        bpy.data.objects[projection_type[0]].select_set(False)
+        bpy.context.selected_objects[0].name = "temp"
+            
         thing.select_set(True)
         bpy.ops.object.join()
 
         bpy.ops.object.mode_set(mode = 'EDIT')   
 
-        #bpy.ops.mesh.intersect(mode='SELECT_UNSELECT', separate_mode='ALL', solver='FAST', threshold=0)
         with suppress_stdout(): bpy.ops.mesh.intersect(mode='SELECT_UNSELECT', separate_mode='ALL', solver='EXACT')
-
-
 
         bpy.ops.mesh.separate(type='LOOSE')
         
         bpy.ops.object.mode_set(mode = 'OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
 
-        mesh_size = len(bpy.data.objects[projection_type[0]].data.vertices)
+        mesh_size = len(bpy.data.objects['temp'].data.vertices)
         for mesh_object in bpy.context.scene.objects:
-            if projection_type[0]+'.' in mesh_object.name:
+            if 'temp'+'.' in mesh_object.name:
                 if len(mesh_object.data.vertices) > mesh_size:
-                    bpy.data.objects[projection_type[0]].select_set(True)
+                    bpy.data.objects['temp'].select_set(True)
                     with suppress_stdout(): bpy.ops.object.delete()
-                    mesh_object.name = projection_type[0]
+                    mesh_object.name = 'temp'
                     mesh_size = len(mesh_object.data.vertices)
                 else:
                     mesh_object.select_set(True)
                     with suppress_stdout(): bpy.ops.object.delete()
-                    
+        
+        bpy.context.view_layer.objects.active = bpy.data.objects['temp']
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch' + vertex_group_name[len(projection_type[1]):])
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+
         bpy.context.view_layer.objects.active = bpy.data.objects[projection_type[0]]
         bpy.data.objects[projection_type[0]].select_set(True)
+        bpy.data.objects['temp'].select_set(True)
+        bpy.ops.object.join()
         
+
         bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_non_manifold()
+        with suppress_stdout(): bpy.ops.mesh.remove_doubles()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
         
         bpy.ops.object.vertex_group_set_active(group=projection_type[3])
         bpy.ops.object.vertex_group_select()
