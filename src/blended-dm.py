@@ -93,6 +93,8 @@ key_well_offset =  0.5                      # depth of key from body
 ## Shell Parameters and Features ##
 ###################################
 
+geode_mode = False                # Forces other perameters
+
 body_thickness = 2
 body_subsurf_level = 1
 relaxed_mesh = True
@@ -791,7 +793,7 @@ bpy.ops.object.vertex_group_select()
 bpy.ops.object.vertex_group_set_active(group='RING_3')
 bpy.ops.object.vertex_group_select()
 
-if relaxed_mesh:
+if relaxed_mesh and not geode_mode:
     bpy.ops.mesh.vertices_smooth(factor=1, wait_for_input=False)
     with suppress_stdout(): bpy.ops.mesh.relax()
 
@@ -843,7 +845,49 @@ bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 bpy.data.objects["body"].select_set(True)
 
-if (body_subsurf_level>0):
+
+if geode_mode:
+    body_subsurf_level=0
+    bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":True, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(-0, -0, -20), "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, True), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+    bpy.data.objects["body"].select_set(True)
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.vertex_group_set_active(group="key_finger")
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group="key_thumb")
+    bpy.ops.object.vertex_group_deselect()
+
+    for x in range(5):
+        bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+        bpy.ops.mesh.subdivide(number_cuts=1, smoothness=1, ngon=True, quadcorner='INNERVERT')
+        bpy.ops.mesh.decimate(ratio=.33)
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.modifier_add(type='SHRINKWRAP')
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'PROJECT'
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'ON_SURFACE'
+    bpy.context.object.modifiers["Shrinkwrap"].cull_face = 'FRONT'
+    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body.001"]
+    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["body.001"].select_set(True)
+    with suppress_stdout(): bpy.ops.object.delete()
+    
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+    bpy.data.objects["body"].select_set(True)
+
+elif (body_subsurf_level>0):
     bpy.ops.object.modifier_add(type='SUBSURF')
     bpy.context.object.modifiers["Subdivision"].levels = body_subsurf_level
     bpy.ops.object.modifier_apply(modifier="Subdivision")
