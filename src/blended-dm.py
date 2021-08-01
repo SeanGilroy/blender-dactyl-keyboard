@@ -847,7 +847,7 @@ bpy.data.objects["body"].select_set(True)
 
 
 if geode_mode:
-    body_subsurf_level=0
+    body_subsurf_level=3
     bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":True, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_non_manifold()
@@ -895,6 +895,7 @@ elif (body_subsurf_level>0):
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
 bpy.ops.object.vertex_group_assign_new()
 bpy.data.objects['body'].vertex_groups['Group'].name = "all"
 bpy.ops.mesh.select_all(action='DESELECT')
@@ -919,6 +920,12 @@ if (body_subsurf_level>0):
         bpy.context.object.modifiers["Subdivision"].levels = 3
     bpy.ops.object.modifier_apply(modifier="Subdivision")
 
+if geode_mode:
+    bpy.ops.object.modifier_add(type='SHRINKWRAP')
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
+    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+    bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
 bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":True, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
 bpy.ops.object.modifier_add(type='SOLIDIFY')
@@ -934,6 +941,8 @@ bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body_inner.001"]
 bpy.data.objects["body_inner.001"].select_set(True)
 with suppress_stdout(): bpy.ops.object.delete()
+
+
 
 bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body_inner.002"]
@@ -1111,15 +1120,6 @@ bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
 bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body_inner_reference"]
 bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
-bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["body_inner_reference"]
-bpy.data.objects["body_inner_reference"].select_set(True)
-with suppress_stdout(): bpy.ops.object.delete()
-
-
-
-
-
 
 
 ###########################
@@ -1268,6 +1268,7 @@ if loligagger_port:
 
 
 
+
 ####################################
 ## Join Inner and Outer Body Mesh ##
 ####################################
@@ -1303,8 +1304,6 @@ bpy.data.objects['body'].select_set(True)
 bpy.ops.object.modifier_add(type='BOOLEAN')
 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
 bpy.context.object.modifiers["Boolean"].solver = 'FAST'
-#bpy.context.object.modifiers["Boolean"].use_self = True
-#bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
 bpy.ops.object.modifier_apply(modifier="Boolean")
 
 bpy.ops.object.mode_set(mode = 'EDIT')
@@ -1401,8 +1400,8 @@ bpy.ops.object.mode_set(mode = 'OBJECT')
 
 bpy.ops.object.modifier_add(type='SHRINKWRAP')
 bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
-bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'OUTSIDE'
-bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body_inner_reference"]
 bpy.context.object.modifiers["Shrinkwrap"].offset = 0.2
 bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "bottom_upper"
 bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
@@ -1443,6 +1442,12 @@ for vertex in grid_mesh.verts:
         vertex.co[2] = 0.1
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.object.mode_set(mode = 'OBJECT')
+
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects["body_inner_reference"]
+bpy.data.objects["body_inner_reference"].select_set(True)
+with suppress_stdout(): bpy.ops.object.delete()
 
 
 
