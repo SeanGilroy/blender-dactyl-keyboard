@@ -793,7 +793,7 @@ bpy.ops.object.vertex_group_select()
 bpy.ops.object.vertex_group_set_active(group='RING_3')
 bpy.ops.object.vertex_group_select()
 
-if relaxed_mesh and not geode_mode:
+if relaxed_mesh:
     bpy.ops.mesh.vertices_smooth(factor=1, wait_for_input=False)
     with suppress_stdout(): bpy.ops.mesh.relax()
 
@@ -941,8 +941,6 @@ bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body_inner.001"]
 bpy.data.objects["body_inner.001"].select_set(True)
 with suppress_stdout(): bpy.ops.object.delete()
-
-
 
 bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body_inner.002"]
