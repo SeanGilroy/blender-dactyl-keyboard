@@ -26,6 +26,9 @@ def suppress_stdout():
 for collection in bpy.data.collections:
     bpy.data.collections.remove(collection)
 
+for object in bpy.data.objects:
+    bpy.data.objects.remove(object)
+    
 
 ###################
 ## Blender Setup ##
