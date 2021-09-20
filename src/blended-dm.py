@@ -18,6 +18,13 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
+            
+#######################################
+## Clear previously Generated Design ##
+#######################################
+
+for collection in bpy.data.collections:
+    bpy.data.collections.remove(collection)
 
 
 ###################
