@@ -247,6 +247,7 @@ for column in range(ncols):
                 bpy.ops.object.select_all(action='DESELECT')
                 if column==ncols-1 and wide_pinky:
                     bpy.ops.object.add_named(name = tool[2])
+                    bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
                     bpy.context.selected_objects[-1].name = tool[0].lower() + tool_identifier
                     bpy.ops.object.select_all(action='DESELECT')
                     if tool[0] not in ['AXIS', 'SWITCH_SUPPORT']:
@@ -254,6 +255,7 @@ for column in range(ncols):
                         bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='VIEW', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
                 else:
                     bpy.ops.object.add_named(name = tool[1])
+                    bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
                     bpy.context.selected_objects[-1].name = tool[0].lower() + tool_identifier
 
                 bpy.data.collections[tool[0]].objects.link(bpy.data.objects[tool[0].lower() + tool_identifier])
@@ -322,8 +324,10 @@ for key in range(len(th_layout)):
         bpy.ops.object.select_all(action='DESELECT')
         if (key>3):
             bpy.ops.object.add_named(name = tool[2])
+            bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
         else:
             bpy.ops.object.add_named(name = tool[1])
+            bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
         bpy.context.selected_objects[-1].name = tool[0].lower() + tool_identifier
         bpy.data.collections[tool[0]].objects.link(bpy.data.objects[tool[0].lower() + tool_identifier])
         bpy.context.collection.objects.unlink(bpy.data.objects[tool[0].lower() + tool_identifier])
@@ -1689,6 +1693,7 @@ if magnet_bottom:
     for x in range(len(magnet_data)):        
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.add_named(name = 'mag_template')
+        bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
         bpy.context.selected_objects[-1].name = 'maghole_' + str(x)
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['maghole_' + str(x)].select_set(True)        
@@ -1725,6 +1730,7 @@ if magnet_bottom:
     for x in range(len(magnet_data)):
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.add_named(name = 'mag_h_template')
+        bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
         bpy.context.selected_objects[-1].name = 'mag_h_' + str(x)
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.objects['mag_h_' + str(x)].select_set(True)    
