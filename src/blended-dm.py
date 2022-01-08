@@ -1087,7 +1087,7 @@ bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
 if loligagger_port:
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(bpy.data.objects['axis - 0, 0'].location[0] - sin(bpy.data.objects['axis - 0, 0'].rotation_euler[0])*mount_width*0.5, 100, 0), scale=(1, 1, 1))
+        bpy.ops.mesh.primitive_cube_add(size=1, enter_editmode=False, align='WORLD', location=(bpy.data.objects['axis - 0, 0'].location[0] - sin(bpy.data.objects['axis - 0, 0'].rotation_euler[0])*mount_width*0.5, 100, 15), scale=(1, 1, 1))
         bpy.context.active_object.name = 'holder_projection'
         bpy.ops.object.modifier_add(type='SHRINKWRAP')
         bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
@@ -1097,6 +1097,7 @@ if loligagger_port:
         bpy.context.object.modifiers["Shrinkwrap"].offset = 0
         bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
+        bpy.ops.transform.translate(value=(0, -2, -15), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
         holder_width = 31.74
         holder_height = 15.5
@@ -1422,10 +1423,10 @@ bpy.context.view_layer.objects.active = bpy.data.objects["bottom"]
 bpy.data.objects["bottom"].select_set(True)
 
 bpy.ops.object.mode_set(mode = 'EDIT')
-
 for x in range(11):
     bpy.ops.mesh.inset(thickness=1, depth=0)
-    with suppress_stdout(): bpy.ops.mesh.remove_doubles(threshold=1)
+    with suppress_stdout(): bpy.ops.mesh.remove_doubles(threshold=1.5)
+
 bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(0, 0, -1.5), "orient_type":'NORMAL', "orient_matrix":((0, 1, 0), (-1, 0, 0), (0, 0, 1)), "orient_matrix_type":'NORMAL', "constraint_axis":(True, True, True), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
 
 bpy.ops.object.vertex_group_set_active(group='bottom_upper')
