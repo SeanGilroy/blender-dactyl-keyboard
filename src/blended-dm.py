@@ -1109,12 +1109,34 @@ if loligagger_port:
         holder_hole_2_width = 33.6
         holder_hole_2_offset = -0.5
 
+        #Outer Fairring
+        bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_width/2, 0, (holder_height - bottom_thickness - 20)/2)), scale=(holder_width-0.4, 2.25+20, holder_height + bottom_thickness + 20 - 0.4))
+        bpy.context.selected_objects[0].name = "holder_outside_fairing"
+        
+        
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+        grid_mesh.verts.ensure_lookup_table()
+        for vertex in [0, 1, 4, 5]:
+            grid_mesh.verts[vertex].select = True
+        bpy.ops.object.vertex_group_assign_new()
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.data.objects['holder_outside_fairing'].vertex_groups['Group'].name = 'outer_project'
+        
 
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        bpy.ops.object.modifier_add(type='BOOLEAN')
+        bpy.context.object.modifiers["Boolean"].operation = 'INTERSECT'
+        bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["body"]
+        bpy.ops.object.modifier_apply(modifier="Boolean")
+
+        
         #Ouside Mesh
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_width/2, 0, (holder_height - bottom_thickness - 20)/2)), scale=(holder_width, 2.25+20, holder_height + bottom_thickness + 20))
         bpy.context.selected_objects[0].name = "holder_outside"
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-        
         bpy.context.view_layer.objects.active = bpy.data.objects["body"]
         bpy.data.objects["body"].select_set(True)
         bpy.ops.object.join()
@@ -1225,7 +1247,19 @@ if loligagger_port:
         bpy.data.objects["body_inner.001"].select_set(True)
         bpy.data.objects["Plane"].select_set(True)
         with suppress_stdout(): bpy.ops.object.delete()
-
+        
+        
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.data.objects["holder_outside_fairing"].select_set(True)
+        bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+        
+        bpy.ops.object.modifier_add(type='SHRINKWRAP')
+        bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+        bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'PROJECT'
+        bpy.context.object.modifiers["Shrinkwrap"].use_project_y = True
+        bpy.context.object.modifiers["Shrinkwrap"].offset = -0.2
+        bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "outer_project"
+        bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
 
 
@@ -1237,6 +1271,14 @@ print("{:.2f}".format(time.time()-start_time), "- Join Inner and Outer Body Mesh
 
 bpy.ops.mesh.primitive_cube_add(size=400, enter_editmode=False, align='WORLD', location=(0, 0, -200 - bottom_thickness), scale=(1, 1, 1))
 bpy.context.selected_objects[0].name = "cut_cube"
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.data.objects["holder_outside_fairing"].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+bpy.ops.object.modifier_add(type='BOOLEAN')
+bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
+bpy.ops.object.modifier_apply(modifier="Boolean")
+
 
 bpy.ops.object.select_all(action='DESELECT')
 bpy.data.objects["body"].select_set(True)
@@ -1442,6 +1484,72 @@ bpy.ops.object.mode_set(mode = 'OBJECT')
 
 
 ##########################
+## Loligagger Formation ##
+##########################
+
+if loligagger_port:
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_hole_width/2 + holder_hole_offset, -2.5, holder_hole_height/2-0.1)), scale=(holder_hole_width - 0.5, 5 + 1, holder_hole_height-0.2))
+    bpy.context.selected_objects[0].name = "holder_outside"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((22.4, -22.2, holder_hole_height/2-0.1)), scale=(21.5 - 0.5, 37, holder_hole_height-0.2))
+    bpy.context.selected_objects[0].name = "holder_inside_1"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside_1"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+    
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((6.7, -12.7, holder_hole_height/2-0.1)), scale=(14, 18, holder_hole_height-0.2))
+    bpy.context.selected_objects[0].name = "holder_inside_2"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+    grid_mesh.verts.ensure_lookup_table()
+    for vertex in [2, 3]:
+        grid_mesh.verts[vertex].select = True
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.bevel(offset=1.5, offset_pct=0, affect='EDGES')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operation = 'UNION'
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside_2"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside"].select_set(True)
+    bpy.data.objects["holder_inside_1"].select_set(True)
+    bpy.data.objects["holder_inside_2"].select_set(True)
+    with suppress_stdout(): bpy.ops.object.delete()
+    
+
+##########################
 ## Loligagger Body Hole ##
 ##########################
 
@@ -1456,7 +1564,6 @@ if loligagger_port:
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
     bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
     bpy.ops.object.modifier_apply(modifier="Boolean")
-    
     
     bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_hole_2_width/2 + holder_hole_2_offset, -8.5, 0)), scale=(holder_hole_2_width, 10, 2*holder_hole_height + 1))
     bpy.context.selected_objects[0].name = "holder_inside"
@@ -1479,9 +1586,8 @@ if loligagger_port:
     bpy.data.objects["body"].select_set(True)
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside"]
-    #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
     bpy.ops.object.modifier_apply(modifier="Boolean")
-    
+
     #bottom extension
     bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector(((holder_hole_2_width-0.4)/2 + holder_hole_2_offset + 0.2, -10-3.7, -(bottom_thickness-0.5)/2 - 0.5)), scale=(holder_hole_2_width-0.4, 20, bottom_thickness-0.01-0.5))
     bpy.context.selected_objects[0].name = "holder_bottom_2"
@@ -1498,6 +1604,7 @@ if loligagger_port:
     bpy.ops.mesh.bevel(offset=1.5, offset_pct=0, affect='EDGES')
     bpy.ops.mesh.select_all(action='SELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
+
 
     bpy.context.view_layer.objects.active = bpy.data.objects["bottom"]
     bpy.data.objects["bottom"].select_set(True)
