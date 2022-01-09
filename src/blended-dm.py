@@ -28,7 +28,7 @@ for collection in bpy.data.collections:
 
 for object in bpy.data.objects:
     bpy.data.objects.remove(object)
-    
+
 
 ###################
 ## Blender Setup ##
@@ -1542,11 +1542,135 @@ if loligagger_port:
     bpy.ops.object.modifier_apply(modifier="Boolean")
     
     
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((15.3, -22.4, 0)), scale=(3.5, 32.5, holder_hole_height+5))
+    bpy.context.selected_objects[0].name = "holder_cutaway_1"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.modifier_add(type='ARRAY')
+    bpy.context.object.modifiers["Array"].relative_offset_displace[0] = 3.9
+    bpy.ops.object.modifier_apply(modifier="Array")
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_1"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((22.15, -22.4, 10.6)), scale=(18.8, 33.5, holder_hole_height+5))
+    bpy.context.selected_objects[0].name = "holder_cutaway_2"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_2"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((17.7, -30.25, 12.625)), scale=(40, 35, holder_hole_height+5))
+    bpy.context.selected_objects[0].name = "holder_cutaway_3"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+    grid_mesh.verts.ensure_lookup_table()
+    for vertex in [2, 6]:
+        grid_mesh.verts[vertex].select = True
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.bevel(offset=8, offset_pct=0, segments=1, affect='EDGES')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_3"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((3.975, -13.75, 12)), scale=(15, 16, holder_hole_height+5))
+    bpy.context.selected_objects[0].name = "holder_cutaway_4"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_4"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((4.15, -13.75, 6.925)), scale=(2.2, 16, holder_hole_height))
+    bpy.context.selected_objects[0].name = "holder_cutaway_5"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    bpy.ops.object.modifier_add(type='ARRAY')
+    bpy.context.object.modifiers["Array"].relative_offset_displace[0] = 2.83
+    bpy.ops.object.modifier_apply(modifier="Array")
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_5"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((22.2, 4.25, 4.5)), scale=(13, 16, 8))
+    bpy.context.selected_objects[0].name = "holder_usb_1"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    bpy.ops.object.modifier_add(type='BEVEL')
+    bpy.context.object.modifiers["Bevel"].width = 2
+    bpy.context.object.modifiers["Bevel"].segments = 30
+    bpy.ops.object.modifier_apply(modifier="Bevel")
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_usb_1"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+    bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((7.25, 4.25, 6.325)), scale=(9, 16, 8))
+    bpy.context.selected_objects[0].name = "holder_trrs_1"
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+    bpy.ops.object.modifier_add(type='BEVEL')
+    bpy.context.object.modifiers["Bevel"].width = 2
+    bpy.context.object.modifiers["Bevel"].segments = 30
+    bpy.ops.object.modifier_apply(modifier="Bevel")
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["holder_outside_fairing"].select_set(True)
+    bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
+    
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_trrs_1"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+    
     bpy.ops.object.select_all(action='DESELECT')
     bpy.data.objects["holder_outside"].select_set(True)
     bpy.data.objects["holder_inside_1"].select_set(True)
     bpy.data.objects["holder_inside_2"].select_set(True)
+    bpy.data.objects["holder_cutaway_1"].select_set(True)
+    bpy.data.objects["holder_cutaway_2"].select_set(True)
+    bpy.data.objects["holder_cutaway_3"].select_set(True)
+    bpy.data.objects["holder_cutaway_4"].select_set(True)
+    bpy.data.objects["holder_cutaway_5"].select_set(True)
+    bpy.data.objects["holder_usb_1"].select_set(True)
+    bpy.data.objects["holder_trrs_1"].select_set(True)
     with suppress_stdout(): bpy.ops.object.delete()
+
     
 
 ##########################
