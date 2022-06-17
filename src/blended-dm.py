@@ -316,8 +316,8 @@ for key in range(len(th_layout)):
     for tool in [['AXIS',                           'key_axis',                          'key_axis'                           ],
                  ['KEYCAP_PROJECTION_OUTER',        'keycap_projection_outer_1u',        'keycap_projection_outer_1.5u'       ],
                  ['KEYCAP_PROJECTION_INNER',        'keycap_projection_inner_1u',        'keycap_projection_inner_1.5u'       ],
-                 ['SWITCH_PROJECTION',              'switch_projection_1u',              'switch_projection_1.5u'             ],
-                 ['SWITCH_PROJECTION_INNER',        'switch_projection_inner_1u',        'switch_projection_inner_1.5u'       ],
+                 ['SWITCH_PROJECTION',              'switch_projection_1u',              'switch_projection_1u'             ],
+                 ['SWITCH_PROJECTION_INNER',        'switch_projection_inner_1u',        'switch_projection_inner_1u'         ],
                  ['SWITCH_HOLE',                    'switch_hole_1u',                    'switch_hole_1.5u'                   ],
                  ['SWITCH_SUPPORT',                 'switch_support_1u',                 'switch_support_1.5u'                ],
                  ['AMEOBA_CUT',                     'ameoba_cut_1u',                     'ameoba_cut_1.5u'                    ]]:
@@ -361,6 +361,81 @@ with suppress_stdout(): bpy.ops.object.delete()
 
 
 
+#####################################
+## RAISE FINGER SWITCHES ABOVE Z=0 ##
+#####################################
+
+extra_Z_offset = 0
+
+bpy.ops.object.select_all(action='DESELECT')
+for thing in bpy.data.objects:
+    if "thumb" not in thing.name: thing.select_set(True)
+bpy.ops.transform.translate(value=(0, 0, -100), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+bpy.ops.object.select_all(action='DESELECT')
+
+
+for collection in ['SWITCH_HOLE', 'AMEOBA_CUT']:
+    for thing in bpy.data.collections[collection].objects:
+        bpy.context.view_layer.objects.active = thing
+        if "thumb" not in thing.name: thing.select_set(True)
+        if "thumb" in thing.name: continue
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+        grid_mesh.verts.ensure_lookup_table()
+        for vertex in grid_mesh.verts:
+            vertex.select = True
+            if vertex.co[2] <= 0.1 and -vertex.co[2] > extra_Z_offset:
+                extra_Z_offset = -vertex.co[2]
+            vertex.select = False
+        thing.select_set(False)
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+
+for object in bpy.data.objects:
+    if "thumb" not in object.name: object.select_set(True)
+bpy.ops.transform.translate(value=(0, 0, extra_Z_offset + 0.2), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+bpy.ops.object.select_all(action='DESELECT')
+
+####################################
+## RAISE THUMB SWITCHES ABOVE Z=0 ##
+####################################
+
+extra_Z_offset = 0
+
+bpy.ops.object.select_all(action='DESELECT')
+for thing in bpy.data.objects:
+    if "thumb" in thing.name: thing.select_set(True)
+bpy.ops.transform.translate(value=(0, 0, -100), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+bpy.ops.object.select_all(action='DESELECT')
+
+
+for collection in ['SWITCH_HOLE', 'AMEOBA_CUT']:
+    for thing in bpy.data.collections[collection].objects:
+        bpy.context.view_layer.objects.active = thing
+        if "thumb" in thing.name: thing.select_set(True)
+        if "thumb" not in thing.name: continue
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+        grid_mesh.verts.ensure_lookup_table()
+        for vertex in grid_mesh.verts:
+            vertex.select = True
+            if vertex.co[2] <= 0.1 and -vertex.co[2] > extra_Z_offset:
+                extra_Z_offset = -vertex.co[2]
+            vertex.select = False
+        thing.select_set(False)
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+
+for object in bpy.data.objects:
+    if "thumb" in object.name: object.select_set(True)
+bpy.ops.transform.translate(value=(0, 0, extra_Z_offset + 0.2), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+bpy.ops.object.select_all(action='DESELECT')
 
 
 
@@ -611,7 +686,6 @@ for side in ['thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE
 
 bpy.ops.object.mode_set(mode = 'OBJECT')
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
 
 
 
@@ -951,6 +1025,7 @@ for thing in bpy.data.collections['SWITCH_PROJECTION'].objects:
 
 bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 bpy.data.objects["body"].select_set(True)
+
 
 
 for projection_type in [['body',       'keycap_projection_outer', mount_thickness + 2, 'all'       ],
