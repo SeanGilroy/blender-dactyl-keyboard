@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import mathutils
+import operator
 from math import pi, radians, sin, cos
 from contextlib import contextmanager
 
@@ -111,12 +112,29 @@ relaxed_mesh = True
 switch_support = True
 loligagger_port = True
 wide_pinky = True
-ameoba_cut = False                # May cause holes in case walls. Possible fix is to increase wall_xy_offset
 lift_for_z_clearence = True       # Lifts the whole keyboard to prevent clipping for z<0 
 magnet_bottom = True             
 magnet_diameter = 6.2
 magnet_height = 2.2
 bottom_thickness = 3              # Thickness of Bottom Plate
+
+# Options include 'none' 'amoeba' and 'royale'
+amoeba_style = 'royale'
+
+if amoeba_style == 'none':
+    amoeba_size = [0, 0, 0]
+    amoeba_position = [0, 0, 0]
+    amoeba_inner_mod = [0, 0, 0]
+elif amoeba_style == 'amoeba':
+    amoeba_size = [19, 16.5, 1.75]
+    amoeba_position = [0, -1, -2.25]
+    amoeba_inner_mod = [2, 1, 0]
+elif amoeba_style == 'royale':
+    amoeba_size = [19, 19, 1.75]
+    amoeba_position = [0, 0, -2.25]
+    amoeba_inner_mod = [2, 2, 0]
+
+
 
 
 
@@ -157,17 +175,15 @@ mount_thickness = 4
 mount_height = keyswitch_height + 3
 mount_width = keyswitch_width + 3
 
-ameoba_height = 16.5
-ameoba_width = 19
-ameoba_thickness = 1.75
+
 
 for size in [1, 1.5]:
     for shape in [['switch_projection', (0, 0, 2*mount_thickness-1), (mount_width, mount_height*size,  4*mount_thickness)],
-                  ['switch_projection_inner', (0, -1*ameoba_cut, 6*mount_thickness-(ameoba_thickness-1.5)*ameoba_cut), (mount_width+1.8+2*ameoba_cut, mount_height*size+1.8+1*ameoba_cut, 12*mount_thickness)],
+                  ['switch_projection_inner', tuple(map(operator.add, (0, 0, 6*mount_thickness), amoeba_position)) , tuple(map(operator.add, (mount_width+1.8, mount_height*size+1.8, 12*mount_thickness), amoeba_inner_mod))],
                   ['keycap_projection_outer', (0, 0, mount_thickness + 4 + 2), (19, 19*size, 8)],
                   ['keycap_projection_inner', (0, 0, mount_thickness + 4 + 2 - 2), (19+2, 19*size+2, 8)],
                   ['switch_hole', (0, 0, 0), (keyswitch_width, keyswitch_height, 2.1*mount_thickness)],
-                  ['ameoba_cut', (0, -1, -ameoba_thickness-1.5), (ameoba_width, ameoba_height, 2*ameoba_thickness)],
+                  ['ameoba_cut', amoeba_position, tuple(map(operator.mul, amoeba_size, (1, 1, 2)))],
                   ['nub_cube', ((1.5 / 2) + 0.5*(keyswitch_width-0.01), 0, 0.5*mount_thickness), (1.5, 2.75, mount_thickness - 0.01)]]:
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=shape[1], scale=shape[2])
@@ -198,20 +214,9 @@ for size in [1, 1.5]:
             bpy.ops.object.origin_set(type='ORIGIN_CURSOR', center='MEDIAN')
             bpy.ops.object.modifier_add(type='MIRROR')
             bpy.ops.object.modifier_apply(modifier="Mirror")
-            
-    bpy.context.view_layer.objects.active = bpy.data.objects["switch_hole_" + str(size) + "u"]
-    '''
-    if (ameoba_cut):
-        bpy.ops.object.modifier_add(type='BOOLEAN')
-        bpy.context.object.modifiers["Boolean"].operation = 'UNION'
-        bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["ameoba_cut_" + str(size) + "u"]
-        bpy.ops.object.modifier_apply(modifier="Boolean")
-    '''
+
     bpy.ops.object.select_all(action='DESELECT')
-    '''
-    bpy.data.objects["ameoba_cut_" + str(size) + "u"].select_set(True)
-    with suppress_stdout(): bpy.ops.object.delete()
-    '''
+
 
 
 ##########################
@@ -325,9 +330,9 @@ for key in range(len(th_layout)):
             bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
             bpy.context.selected_objects[-1].name = tool[0].lower() + tool_identifier
             if tool[0] in [ 'AMEOBA_CUT']:
-                bpy.ops.transform.translate(value=(0, 1, 0), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.translate(value=(0, -amoeba_position[1], 0), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
                 bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='VIEW', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
-                bpy.ops.transform.translate(value=(-1, 0, 0), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+                bpy.ops.transform.translate(value=(amoeba_position[1], 0, 0), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
             if tool[0] in [ 'SWITCH_HOLE']:
                 bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='VIEW', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
 
@@ -742,15 +747,16 @@ for group in ['finger_LEFT', 'finger_TOP', 'finger_RIGHT', 'finger_BOTTOM', 'thu
 bpy.ops.mesh.select_all(action='DESELECT')
 
 # Correct sizing for Thumb_6
-bpy.ops.object.vertex_group_set_active(group="BRIDGE_MID")
-bpy.ops.object.vertex_group_select()
-bpy.ops.object.vertex_group_set_active(group="key_finger")
-bpy.ops.object.vertex_group_deselect()
-bpy.ops.mesh.select_all(action='INVERT')
-bpy.ops.mesh.select_non_manifold()
-bpy.ops.mesh.select_all(action='INVERT')
-with suppress_stdout(): bpy.ops.mesh.offset_edges(geometry_mode='move', width=1, angle=0, caches_valid=False)
-bpy.ops.mesh.select_all(action='DESELECT')
+if amoeba_style != 'none':
+    bpy.ops.object.vertex_group_set_active(group="BRIDGE_MID")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="key_finger")
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.mesh.select_all(action='INVERT')
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.mesh.select_all(action='INVERT')
+    with suppress_stdout(): bpy.ops.mesh.offset_edges(geometry_mode='move', width=2, angle=0, caches_valid=False)
+    bpy.ops.mesh.select_all(action='DESELECT')
 
 bpy.ops.object.mode_set(mode = 'OBJECT')
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
@@ -1051,8 +1057,24 @@ bpy.data.objects["body"].select_set(True)
 for projection_type in [['body',       'keycap_projection_outer', mount_thickness + 2, 'all'       ],
                         ['body',       'switch_projection'      , mount_thickness,     'all'       ],
                         ['body_inner', 'keycap_projection_inner', mount_thickness,     'all_inside'],
-                        ['body_inner', 'switch_projection_inner', (-1.5-ameoba_thickness)*ameoba_cut,       'all_inside']]:
-
+                        ['body_inner', 'switch_projection_inner', amoeba_position[2],  'all_inside']]:
+    
+    if projection_type[1] in ['keycap_projection_inner', 'switch_projection_inner']:
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode = 'OBJECT') 
+        
+        bpy.context.view_layer.objects.active = bpy.data.objects[projection_type[0]]
+        bpy.data.objects[projection_type[0]].select_set(True)
+        
+        bpy.ops.object.modifier_add(type='BOOLEAN')
+        bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+        bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections[projection_type[1].upper()]
+        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
+        bpy.ops.object.modifier_apply(modifier="Boolean")
+            
     for thing in bpy.data.collections[projection_type[1].upper()].objects:
         print("    ---" + thing.name)
         vertex_group_name = thing.name
@@ -1067,13 +1089,15 @@ for projection_type in [['body',       'keycap_projection_outer', mount_thicknes
         bpy.ops.object.mode_set(mode = 'EDIT')
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode = 'OBJECT') 
-
-        bpy.ops.object.modifier_add(type='BOOLEAN')
-        bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
-        bpy.ops.object.modifier_apply(modifier="Boolean")
         
         if projection_type[1] in ['switch_projection']:
+            
+            bpy.ops.object.modifier_add(type='BOOLEAN')
+            bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
+            bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
+            bpy.ops.object.modifier_apply(modifier="Boolean")
+        
             bpy.ops.object.mode_set(mode = 'EDIT')
             bpy.ops.mesh.edge_face_add()
             bpy.ops.mesh.inset(thickness=0, depth=0)
@@ -2226,6 +2250,7 @@ bpy.data.objects['body'].select_set(True)
 bpy.ops.object.modifier_add(type='BOOLEAN')
 bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
 bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
 bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE"]
 bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -2235,7 +2260,7 @@ bpy.ops.object.modifier_apply(modifier="Boolean")
 ## Create Ameoba Cuts ##
 ########################
 
-if ameoba_cut:
+if amoeba_style != 'none':
     print("{:.2f}".format(time.time()-start_time), "- Add Ameoba Cuts")
 
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
@@ -2243,7 +2268,8 @@ if ameoba_cut:
 
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
-    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
     bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["AMEOBA_CUT"]
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -2263,6 +2289,7 @@ if switch_support:
     bpy.context.object.modifiers["Boolean"].operation = 'UNION'
     bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
     bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
     bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_SUPPORT"]
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
