@@ -58,7 +58,7 @@ alpha = pi / 12.0               # curvature of the columns
 beta  = pi / 36.0               # curvature of the rows
 centerrow = nrows - 3           # controls front_back tilt
 centercol = 3                   # controls left_right tilt / tenting (higher number is more tenting)
-tenting_angle = pi / 12.0       # or, change this for more precise tenting control
+tenting_angle = pi / 15.0       # or, change this for more precise tenting control
 sa_profile_key_height = 12.7
 
 if nrows > 5:
@@ -105,32 +105,42 @@ key_well_offset =  0.5                      # depth of key from body
 ###################################
 
 geode_mode = False                # Forces other perameters
+geode_ratio = 0.1              # Good values ~0.1-1
+geode_offset = 0.5
+geode_seed = 0
+
 
 body_thickness = 2
-body_subsurf_level = 4
+body_subsurf_level = 1
 relaxed_mesh = True
 switch_support = True
 loligagger_port = True
 wide_pinky = True
 lift_for_z_clearence = True       # Lifts the whole keyboard to prevent clipping for z<0 
+lift_for_z_clearence_finger_only = False
+lift_for_z_clearence_thumb_only = False
 magnet_bottom = True             
 magnet_diameter = 6.2
 magnet_height = 2.2
 bottom_thickness = 3              # Thickness of Bottom Plate
 
-# Options include 'none' 'amoeba' and 'royale'
-amoeba_style = 'royale'
+# Options include 'none' 'amoeba' 'royale' and 'king'
+amoeba_style = 'king'
 
 if amoeba_style == 'none':
     amoeba_size = [0, 0, 0]
     amoeba_position = [0, 0, 0]
     amoeba_inner_mod = [0, 0, 0]
 elif amoeba_style == 'amoeba':
-    amoeba_size = [19, 16.5, 1.75]
+    amoeba_size = [19.3, 16.5, 1.75]
     amoeba_position = [0, -1, -2.25]
     amoeba_inner_mod = [2, 1, 0]
 elif amoeba_style == 'royale':
-    amoeba_size = [19, 19, 1.75]
+    amoeba_size = [19, 18.3, 1.75]
+    amoeba_position = [0, 0, -2.25]
+    amoeba_inner_mod = [2, 2, 0]
+elif amoeba_style == 'king':
+    amoeba_size = [19.4, 19.4, 1.75]
     amoeba_position = [0, 0, -2.25]
     amoeba_inner_mod = [2, 2, 0]
 
@@ -182,7 +192,7 @@ for size in [1, 1.5]:
                   ['switch_projection_inner', tuple(map(operator.add, (0, 0, 6*mount_thickness), amoeba_position)) , tuple(map(operator.add, (mount_width+1.8, mount_height*size+1.8, 12*mount_thickness), amoeba_inner_mod))],
                   ['keycap_projection_outer', (0, 0, mount_thickness + 4 + 2), (19, 19*size, 8)],
                   ['keycap_projection_inner', (0, 0, mount_thickness + 4 + 2 - 2), (19+2, 19*size+2, 8)],
-                  ['switch_hole', (0, 0, 0), (keyswitch_width, keyswitch_height, 2.1*mount_thickness)],
+                  ['switch_hole', (0, 0, 0), (keyswitch_width, keyswitch_height, 3*mount_thickness)],
                   ['ameoba_cut', amoeba_position, tuple(map(operator.mul, amoeba_size, (1, 1, 2)))],
                   ['nub_cube', ((1.5 / 2) + 0.5*(keyswitch_width-0.01), 0, 0.5*mount_thickness), (1.5, 2.75, mount_thickness - 0.01)]]:
         
@@ -320,7 +330,7 @@ for key in range(len(th_layout)):
                  ['KEYCAP_PROJECTION_OUTER',        'keycap_projection_outer_1u',        'keycap_projection_outer_1.5u'       ],
                  ['KEYCAP_PROJECTION_INNER',        'keycap_projection_inner_1u',        'keycap_projection_inner_1.5u'       ],
                  ['SWITCH_PROJECTION',              'switch_projection_1u',              'switch_projection_1.5u'             ],
-                 ['SWITCH_PROJECTION_INNER',        'switch_projection_inner_1u',        'switch_projection_inner_1.5u'         ],
+                 ['SWITCH_PROJECTION_INNER',        'switch_projection_inner_1u',        'switch_projection_inner_1u'         ],
                  ['SWITCH_HOLE',                    'switch_hole_1u',                    'switch_hole_1.5u'                   ],
                  ['SWITCH_SUPPORT',                 'switch_support_1u',                 'switch_support_1.5u'                ],
                  ['AMEOBA_CUT',                     'ameoba_cut_1u',                     'ameoba_cut_1.5u'                    ]]:
@@ -373,13 +383,51 @@ bpy.data.objects['key_axis'].select_set(True)
 with suppress_stdout(): bpy.ops.object.delete()
 
 
+#####################################
+## RAISE ALL SWITCHES ABOVE Z=0 ##
+#####################################
+
+
+if lift_for_z_clearence:
+    extra_Z_offset = 0
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.transform.translate(value=(0, 0, -100), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+    bpy.ops.object.select_all(action='DESELECT')
+
+
+    for collection in ['SWITCH_HOLE', 'AMEOBA_CUT']:
+        for thing in bpy.data.collections[collection].objects:
+            bpy.context.view_layer.objects.active = thing
+            thing.select_set(True)
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.mesh.select_all(action='DESELECT')
+            
+            grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+            grid_mesh.verts.ensure_lookup_table()
+            for vertex in grid_mesh.verts:
+                vertex.select = True
+                if vertex.co[2] + 2.6 <= 0 and -2.6-vertex.co[2] > extra_Z_offset:
+                    extra_Z_offset = -2.6-vertex.co[2]
+                vertex.select = False
+            thing.select_set(False)
+            bpy.ops.object.mode_set(mode = 'OBJECT')
+
+    bpy.ops.object.select_all(action='SELECT')
+    bpy.ops.transform.translate(value=(0, 0, extra_Z_offset + 0.2), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+    bpy.ops.object.select_all(action='DESELECT')
+
+
 
 #####################################
 ## RAISE FINGER SWITCHES ABOVE Z=0 ##
 #####################################
 
 
-if lift_for_z_clearence:
+if lift_for_z_clearence_finger_only:
     extra_Z_offset = 0
 
     bpy.ops.object.select_all(action='DESELECT')
@@ -414,43 +462,46 @@ if lift_for_z_clearence:
     bpy.ops.transform.translate(value=(0, 0, extra_Z_offset + 0.2), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
     bpy.ops.object.select_all(action='DESELECT')
 
+
 ####################################
 ## RAISE THUMB SWITCHES ABOVE Z=0 ##
 ####################################
 
-extra_Z_offset = 0
 
-bpy.ops.object.select_all(action='DESELECT')
-for thing in bpy.data.objects:
-    if "thumb" in thing.name: thing.select_set(True)
-bpy.ops.transform.translate(value=(0, 0, -100), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-bpy.ops.object.select_all(action='DESELECT')
+if lift_for_z_clearence_thumb_only:
+    extra_Z_offset = 0
 
-
-for collection in ['SWITCH_HOLE', 'AMEOBA_CUT']:
-    for thing in bpy.data.collections[collection].objects:
-        bpy.context.view_layer.objects.active = thing
+    bpy.ops.object.select_all(action='DESELECT')
+    for thing in bpy.data.objects:
         if "thumb" in thing.name: thing.select_set(True)
-        if "thumb" not in thing.name: continue
-        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.ops.transform.translate(value=(0, 0, -100), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+    bpy.ops.object.select_all(action='DESELECT')
 
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.mesh.select_all(action='DESELECT')
 
-        grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-        grid_mesh.verts.ensure_lookup_table()
-        for vertex in grid_mesh.verts:
-            vertex.select = True
-            if vertex.co[2] <= 0.1 and -vertex.co[2] > extra_Z_offset:
-                extra_Z_offset = -vertex.co[2]
-            vertex.select = False
-        thing.select_set(False)
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+    for collection in ['SWITCH_HOLE', 'AMEOBA_CUT']:
+        for thing in bpy.data.collections[collection].objects:
+            bpy.context.view_layer.objects.active = thing
+            if "thumb" in thing.name: thing.select_set(True)
+            if "thumb" not in thing.name: continue
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-for object in bpy.data.objects:
-    if "thumb" in object.name: object.select_set(True)
-bpy.ops.transform.translate(value=(0, 0, extra_Z_offset + 0.2), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-bpy.ops.object.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.mesh.select_all(action='DESELECT')
+
+            grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+            grid_mesh.verts.ensure_lookup_table()
+            for vertex in grid_mesh.verts:
+                vertex.select = True
+                if vertex.co[2] <= 0.1 and -vertex.co[2] > extra_Z_offset:
+                    extra_Z_offset = -vertex.co[2]
+                vertex.select = False
+            thing.select_set(False)
+            bpy.ops.object.mode_set(mode = 'OBJECT')
+
+    for object in bpy.data.objects:
+        if "thumb" in object.name: object.select_set(True)
+    bpy.ops.transform.translate(value=(0, 0, extra_Z_offset + 0.2), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, False, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+    bpy.ops.object.select_all(action='DESELECT')
 
 
 
@@ -460,122 +511,139 @@ bpy.ops.object.select_all(action='DESELECT')
 
 print("{:.2f}".format(time.time()-start_time), "- Generate Finger Plate")
 
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=2*nrows-1, y_subdivisions=2*ncols-1, size=1, rotation=(0, 0, -pi/2))
-bpy.ops.transform.resize(value=(2*ncols-1, 2*nrows-1, 1))
-bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-bpy.context.selected_objects[0].name = "finger_plate"          
 
+for finger_plate in ["top", "bottom"]:
+    
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=2*nrows-1, y_subdivisions=2*ncols-1, size=1, rotation=(0, 0, -pi/2))
+    bpy.ops.transform.resize(value=(2*ncols-1, 2*nrows-1, 1))
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.context.selected_objects[0].name = "finger_plate_" + finger_plate
 
-bpy.ops.object.mode_set(mode = 'EDIT')
-bpy.ops.mesh.select_all(action='DESELECT')
-face_is_a_key = []
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    face_is_a_key = []
 
-grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-grid_mesh.verts.ensure_lookup_table()
-grid_mesh.edges.ensure_lookup_table()
-grid_mesh.faces.ensure_lookup_table()
+    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+    grid_mesh.verts.ensure_lookup_table()
+    grid_mesh.edges.ensure_lookup_table()
+    grid_mesh.faces.ensure_lookup_table()
 
-            
-for column in range(ncols):
-    for row in range(nrows):
-        if (column in [2, 3]) or (not row == lastrow):
-            
-            face_is_a_key.append(row * 2 + column* 2*(2*nrows-1))            
-            grid_mesh.faces[face_is_a_key[-1]].select = True
-            
-            bpy.ops.object.vertex_group_assign_new()
-            bpy.data.objects['finger_plate'].vertex_groups['Group'].name = 'switch - '+ str(column) + ', ' + str(row)
+                
+    for column in range(ncols):
+        for row in range(nrows):
+            if (column in [2, 3]) or (not row == lastrow):
+                
+                face_is_a_key.append(row * 2 + column* 2*(2*nrows-1))            
+                grid_mesh.faces[face_is_a_key[-1]].select = True
+                
+                bpy.ops.object.vertex_group_assign_new()
+                bpy.data.objects["finger_plate_" + finger_plate].vertex_groups['Group'].name = 'switch - '+ str(column) + ', ' + str(row)
 
-            switch_size = 1
-            if column==ncols-1 and wide_pinky: switch_size = 1.5
-            bpy.ops.transform.resize(value=(mount_height*switch_size + 0.25, mount_width + 0.25, 1))
+                switch_size = 1
+                if column==ncols-1 and wide_pinky: switch_size = 1.5
+                
+                if finger_plate is "top":
+                    bpy.ops.transform.resize(value=(mount_height*switch_size + 0.25, mount_width + 0.25, 1))
+                                
+                    bpy.ops.transform.translate(value=-grid_mesh.faces[face_is_a_key[-1]].calc_center_median(), orient_type='GLOBAL')
+                    bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
+
+                    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.translate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].location, orient_type='GLOBAL')
+                
+                elif finger_plate is "bottom":
+                    bpy.ops.transform.resize(value=((amoeba_size[0]*switch_size + 1) if (amoeba_size[0]*switch_size + 1) > (mount_height*switch_size + 0.25) else (mount_height*switch_size + 0.25), (amoeba_size[1] + 1) if (amoeba_size[1] + 1) > (mount_width + 0.25) else (mount_width + 0.25), 1))
                         
-            bpy.ops.transform.translate(value=-grid_mesh.faces[face_is_a_key[-1]].calc_center_median(), orient_type='GLOBAL')
-            bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
-            
-            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
-            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
-            bpy.ops.transform.translate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].location, orient_type='GLOBAL')
-            bpy.ops.mesh.select_all(action='DESELECT')
+                    bpy.ops.transform.translate(value=-grid_mesh.faces[face_is_a_key[-1]].calc_center_median(), orient_type='GLOBAL')
+                    bpy.ops.transform.translate(value=(0, 0, key_well_offset+amoeba_position[2]), orient_type='GLOBAL')
 
+                    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.translate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].location, orient_type='GLOBAL')
+                    bpy.ops.transform.translate(value=(0,0,-key_well_offset), orient_type='GLOBAL') 
+                
+                bpy.ops.mesh.select_all(action='DESELECT')
+                
 
-for vertex_group_name in ['key_finger', 'finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'RING_0', 'RING_1', 'RING_2', 'RING_3', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.data.objects['finger_plate'].vertex_groups['Group'].name = vertex_group_name
+    for vertex_group_name in ['key_finger', 'finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'RING_0', 'RING_1', 'RING_2', 'RING_3', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+        bpy.ops.object.vertex_group_assign_new()
+        bpy.data.objects["finger_plate_" + finger_plate].vertex_groups['Group'].name = vertex_group_name
 
-# Vertex Group - key
-for face in face_is_a_key:
-    grid_mesh.faces[face].select = True
-bpy.ops.object.vertex_group_set_active(group='key_finger')
-bpy.ops.object.vertex_group_assign()
-bpy.ops.mesh.select_all(action='DESELECT')
-
-
-# Create vertex group faces
-for side in [['finger_TOP',          [0, nrows*(ncols-1)*4 + nrows*2]],
-             ['finger_LEFT',         [0, nrows*2-3]],
-             ['finger_RIGHT',        [nrows*(ncols-1)*4 + nrows*2, nrows*ncols*4-3]],
-             ['finger_BOTTOM',       [nrows*14-1, nrows*ncols*4-3]],
-             ['finger_corner_BL',    [nrows*2-3]],
-             ['finger_corner_TL',    [0]],
-             ['finger_corner_TR',    [nrows*(ncols-1)*4 + nrows*2]],
-             ['finger_corner_BR',    [nrows*ncols*4-3]],
-             ['BRIDGE_LEFT',         [nrows*2-3, nrows*6-3]],
-             ['BRIDGE_MID',          [nrows*6-3, nrows*10-1]],
-             ['BRIDGE_RIGHT',        [nrows*10-1, nrows*14-1]],
-             ['BRIDGE_LEFT_RING_0',  [nrows*2-3]],
-             ['BRIDGE_RIGHT_RING_0', [nrows*14-1]]]:
-
-    bpy.ops.object.vertex_group_set_active(group=side[0])
-    for vertex in side[1]:
-        grid_mesh.verts[vertex].select = True
+    # Vertex Group - key
+    for face in face_is_a_key:
+        grid_mesh.faces[face].select = True
+    bpy.ops.object.vertex_group_set_active(group='key_finger')
     bpy.ops.object.vertex_group_assign()
     bpy.ops.mesh.select_all(action='DESELECT')
 
 
-# Create temporary vertex groups for adding faces
-for side in [['CORRECTION_1', [nrows*8 - 3,  nrows*10 - 2]],
-             ['CORRECTION_2', [nrows*16 - 1, nrows*20 - 3]]]:
+    # Create vertex group faces
+    for side in [['finger_TOP',          [0, nrows*(ncols-1)*4 + nrows*2]],
+                 ['finger_LEFT',         [0, nrows*2-3]],
+                 ['finger_RIGHT',        [nrows*(ncols-1)*4 + nrows*2, nrows*ncols*4-3]],
+                 ['finger_BOTTOM',       [nrows*14-1, nrows*ncols*4-3]],
+                 ['finger_corner_BL',    [nrows*2-3]],
+                 ['finger_corner_TL',    [0]],
+                 ['finger_corner_TR',    [nrows*(ncols-1)*4 + nrows*2]],
+                 ['finger_corner_BR',    [nrows*ncols*4-3]],
+                 ['BRIDGE_LEFT',         [nrows*2-3, nrows*6-3]],
+                 ['BRIDGE_MID',          [nrows*6-3, nrows*10-1]],
+                 ['BRIDGE_RIGHT',        [nrows*10-1, nrows*14-1]],
+                 ['BRIDGE_LEFT_RING_0',  [nrows*2-3]],
+                 ['BRIDGE_RIGHT_RING_0', [nrows*14-1]]]:
 
-    for vertex in side[1]:
-        grid_mesh.verts[vertex].select = True
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.data.objects['finger_plate'].vertex_groups['Group'].name = side[0]
-    bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group=side[0])
+        for vertex in side[1]:
+            grid_mesh.verts[vertex].select = True
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
 
 
-# Remove unused faces
-bpy.ops.object.vertex_group_set_active(group='key_finger')
-bpy.ops.object.vertex_group_select()
-bpy.ops.mesh.select_mode(type="FACE")
-bpy.ops.mesh.select_all(action='INVERT')
-bpy.ops.mesh.delete(type='FACE')
-bpy.ops.mesh.select_mode(type="VERT")
+    # Create temporary vertex groups for adding faces
+    for side in [['CORRECTION_1', [nrows*8 - 3,  nrows*10 - 2]],
+                 ['CORRECTION_2', [nrows*16 - 1, nrows*20 - 3]]]:
+
+        for vertex in side[1]:
+            grid_mesh.verts[vertex].select = True
+        bpy.ops.object.vertex_group_assign_new()
+        bpy.data.objects["finger_plate_" + finger_plate].vertex_groups['Group'].name = side[0]
+        bpy.ops.mesh.select_all(action='DESELECT')
 
 
-# Add correction faces
-for side in ['CORRECTION_1', 'CORRECTION_2']:
-    bpy.ops.object.vertex_group_set_active(group=side)
+    # Remove unused faces
+    bpy.ops.object.vertex_group_set_active(group='key_finger')
     bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.shortest_path_select(edge_mode='SELECT')
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-    bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.object.vertex_group_remove()
+    bpy.ops.mesh.select_mode(type="FACE")
+    bpy.ops.mesh.select_all(action='INVERT')
+    bpy.ops.mesh.delete(type='FACE')
+    bpy.ops.mesh.select_mode(type="VERT")
 
 
-# Add connecting edges to vertex groups
-for side in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT']:
-    bpy.ops.object.vertex_group_set_active(group=side)
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.shortest_path_select(edge_mode='SELECT', use_topology_distance=True)
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
+    # Add correction faces
+    for side in ['CORRECTION_1', 'CORRECTION_2']:
+        bpy.ops.object.vertex_group_set_active(group=side)
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.shortest_path_select(edge_mode='SELECT')
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_remove()
 
 
-bpy.ops.object.mode_set(mode = 'OBJECT')
-bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    # Add connecting edges to vertex groups
+    for side in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT']:
+        bpy.ops.object.vertex_group_set_active(group=side)
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.shortest_path_select(edge_mode='SELECT', use_topology_distance=True)
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
 
 
@@ -585,122 +653,138 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
 print("{:.2f}".format(time.time()-start_time), "- Generate Thumb Plate")
 
-#bpy.ops.object.select_all(action='DESELECT')
+for thumb_plate in ["top", "bottom"]:
 
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=7, size=1, location=(0, 0, mount_thickness), rotation=(0, 0, -pi/2))
-bpy.ops.transform.resize(value=(7, 3, 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-bpy.context.selected_objects[0].name = "thumb_plate"
-
-
-bpy.ops.object.mode_set(mode = 'EDIT')
-bpy.ops.mesh.select_all(action='DESELECT')
-    
-grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-grid_mesh.verts.ensure_lookup_table()
-grid_mesh.edges.ensure_lookup_table()
-grid_mesh.faces.ensure_lookup_table()
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=7, size=1, location=(0, 0, mount_thickness), rotation=(0, 0, -pi/2))
+    bpy.ops.transform.resize(value=(7, 3, 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(False, True, False), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.context.selected_objects[0].name = "thumb_plate_" + thumb_plate
 
 
-faces_to_use = [0, 2, 6, 8, 12, 18]
-
-# Apply transfomations to each key face
-for thumb in range(len(faces_to_use)):
-    grid_mesh.faces[faces_to_use[thumb]].select = True
-    
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.data.objects['thumb_plate'].vertex_groups['Group'].name = 'switch - thumb - ' + str(thumb)
-    
-    switch_size = 1
-    if thumb>3: switch_size = 1.5               
-    bpy.ops.transform.resize(value=(mount_height+0.25, mount_height*switch_size+0.25, 1))
-    
-    bpy.ops.transform.translate(value=-grid_mesh.faces[faces_to_use[thumb]].calc_center_median(), orient_type='GLOBAL')
-    bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
-
-    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
-    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-    bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
-    bpy.ops.transform.translate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
-
-    bpy.ops.transform.translate(value=(0, 0, key_well_offset), orient_type='NORMAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
-    
+    bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
+        
+    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+    grid_mesh.verts.ensure_lookup_table()
+    grid_mesh.edges.ensure_lookup_table()
+    grid_mesh.faces.ensure_lookup_table()
 
 
-for vertex_group_name in ['key_thumb', 'thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'thumb_corner_TL', 'thumb_corner_TLL', 'thumb_corner_ML', 'thumb_corner_BL', 'thumb_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
-    bpy.ops.object.vertex_group_assign_new()
-    bpy.data.objects['thumb_plate'].vertex_groups['Group'].name = vertex_group_name
+    faces_to_use = [0, 2, 6, 8, 12, 18]
 
-# Remove unused faces
-grid_mesh.faces.ensure_lookup_table()
-for num in faces_to_use:
-    grid_mesh.faces[num].select = True
-bpy.ops.mesh.select_mode(type="VERT")
-bpy.ops.mesh.select_all(action='INVERT')
-bpy.ops.mesh.delete(type='VERT')
-grid_mesh.faces.ensure_lookup_table()
-grid_mesh.faces[7].select = True
-bpy.ops.mesh.delete(type='FACE')
+    # Apply transfomations to each key face
+    for thumb in range(len(faces_to_use)):
+        grid_mesh.faces[faces_to_use[thumb]].select = True
+        
+        bpy.ops.object.vertex_group_assign_new()
+        bpy.data.objects["thumb_plate_" + thumb_plate].vertex_groups['Group'].name = 'switch - thumb - ' + str(thumb)
+        
+        switch_size = 1
+        if thumb>3: switch_size = 1.5
+        if thumb_plate is "top":
+            bpy.ops.transform.resize(value=(mount_height+0.25, mount_height*switch_size+0.25, 1))
+            
+            bpy.ops.transform.translate(value=-grid_mesh.faces[faces_to_use[thumb]].calc_center_median(), orient_type='GLOBAL')
+            bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
+
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.translate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+            bpy.ops.transform.translate(value=(0, 0, key_well_offset), orient_type='NORMAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
+        
+        if thumb_plate is "bottom":
+            switch_size = 1
+            bpy.ops.transform.resize(value=((amoeba_size[0] + 1) if (amoeba_size[0] + 1) > (mount_height+0.25) else (mount_height+0.25), (amoeba_size[1]*switch_size + 1) if (amoeba_size[1]*switch_size + 1) > (mount_height*switch_size+0.25) else (mount_height*switch_size+0.25), 1))
+    
+            bpy.ops.transform.translate(value=-grid_mesh.faces[faces_to_use[thumb]].calc_center_median(), orient_type='GLOBAL')
+            bpy.ops.transform.translate(value=(0, 0, key_well_offset+amoeba_position[2]), orient_type='GLOBAL')
+
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+            bpy.ops.transform.translate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+            bpy.ops.transform.translate(value=(0, 0, key_well_offset), orient_type='NORMAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+
+    for vertex_group_name in ['key_thumb', 'thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'thumb_corner_TL', 'thumb_corner_TLL', 'thumb_corner_ML', 'thumb_corner_BL', 'thumb_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+        bpy.ops.object.vertex_group_assign_new()
+        bpy.data.objects["thumb_plate_" + thumb_plate].vertex_groups['Group'].name = vertex_group_name
+
+    # Remove unused faces
+    grid_mesh.faces.ensure_lookup_table()
+    for num in faces_to_use:
+        grid_mesh.faces[num].select = True
+    bpy.ops.mesh.select_mode(type="VERT")
+    bpy.ops.mesh.select_all(action='INVERT')
+    bpy.ops.mesh.delete(type='VERT')
+    grid_mesh.faces.ensure_lookup_table()
+    grid_mesh.faces[7].select = True
+    bpy.ops.mesh.delete(type='FACE')
 
 
 
-# Add correction faces
-grid_mesh.verts.ensure_lookup_table()
-for correction in [[ 0,  4,  8],
-                   [15, 21, 23],
-                   [14, 15, 19, 21],
-                   [14, 17, 19],
-                   [ 9, 10, 13, 14, 17]]:
-    for vertex in correction:
-        grid_mesh.verts[vertex].select = True
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-    bpy.ops.mesh.select_all(action='DESELECT')
+    # Add correction faces
+    grid_mesh.verts.ensure_lookup_table()
+    for correction in [[ 0,  4,  8],
+                       [15, 21, 23],
+                       [14, 15, 19, 21],
+                       [14, 17, 19],
+                       [ 9, 10, 13],
+                       [10, 13, 14],
+                       [13, 14, 17]]:
+        for vertex in correction:
+            grid_mesh.verts[vertex].select = True
+        if thumb_plate is "bottom" and correction == [ 9, 10, 13, 14, 17]: print(zzz)
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+        bpy.ops.mesh.select_all(action='DESELECT')
 
-
-
-# Vertex Group - key
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.object.vertex_group_set_active(group='key_thumb')
-bpy.ops.object.vertex_group_assign()
-bpy.ops.mesh.select_all(action='DESELECT')
-
-
-
-# Create vertex group faces
-for side in [['thumb_LEFT',   [0, 12]],
-             ['thumb_RIGHT',  [3, 23]],
-             ['thumb_BOTTOM', [0, 3]],
-             ['thumb_corner_TL',  [16]],
-             ['thumb_corner_TLL', [12]],
-             ['thumb_corner_ML',  [8]],
-             ['thumb_corner_BL',  [0]],
-             ['thumb_corner_BR',  [3]],
-             ['BRIDGE_LEFT',         [16, 20]],
-             ['BRIDGE_MID',          [20, 23]],
-             ['BRIDGE_RIGHT',        [23]],
-             ['BRIDGE_LEFT_RING_0',  [12, 16]],
-             ['BRIDGE_RIGHT_RING_0', [23]]]:
-
-    bpy.ops.object.vertex_group_set_active(group=side[0])
-    for vertex in side[1]:
-        grid_mesh.verts[vertex].select = True
+    # Vertex Group - key
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.vertex_group_set_active(group='key_thumb')
     bpy.ops.object.vertex_group_assign()
     bpy.ops.mesh.select_all(action='DESELECT')
 
 
 
-# Add connecting edges to vertex groups
-for side in ['thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID']:
-    bpy.ops.object.vertex_group_set_active(group=side)
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.shortest_path_select(edge_mode='SELECT', use_topology_distance=True)
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
+    # Create vertex group faces
+    for side in [['thumb_LEFT',   [0, 12]],
+                 ['thumb_RIGHT',  [3, 23]],
+                 ['thumb_BOTTOM', [0, 3]],
+                 ['thumb_corner_TL',  [16]],
+                 ['thumb_corner_TLL', [12]],
+                 ['thumb_corner_ML',  [8]],
+                 ['thumb_corner_BL',  [0]],
+                 ['thumb_corner_BR',  [3]],
+                 ['BRIDGE_LEFT',         [16, 20]],
+                 ['BRIDGE_MID',          [20, 23]],
+                 ['BRIDGE_RIGHT',        [23]],
+                 ['BRIDGE_LEFT_RING_0',  [12, 16]],
+                 ['BRIDGE_RIGHT_RING_0', [23]]]:
 
-bpy.ops.object.mode_set(mode = 'OBJECT')
-bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        bpy.ops.object.vertex_group_set_active(group=side[0])
+        for vertex in side[1]:
+            grid_mesh.verts[vertex].select = True
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+
+
+    # Add connecting edges to vertex groups
+    for side in ['thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID']:
+        bpy.ops.object.vertex_group_set_active(group=side)
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.shortest_path_select(edge_mode='SELECT', use_topology_distance=True)
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
 
 
@@ -708,15 +792,28 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 ## CONNECT PLATES ##
 ####################
 
-print("{:.2f}".format(time.time()-start_time), "- Connect Finger and Thumb Plates")
+print("{:.2f}".format(time.time()-start_time), "- Connect Finger and Thumb Top Plates")
 
 # Join finger_plate and thumb_plate meshes
-bpy.data.objects["thumb_plate"].select_set(True)
-bpy.data.objects["finger_plate"].select_set(True)
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top']
+bpy.data.objects["finger_plate_top"].select_set(True)
+bpy.data.objects["thumb_plate_top"].select_set(True)
 bpy.ops.object.join()
 bpy.context.active_object.name = "body"
 
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+
+for thing in bpy.data.collections["AMEOBA_CUT"].objects:
+    bpy.context.view_layer.objects.active = thing
+    thing.select_set(True)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+bpy.ops.object.select_all(action='DESELECT')
+
+bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+bpy.data.objects["body"].select_set(True)
+
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 
@@ -746,20 +843,157 @@ for group in ['finger_LEFT', 'finger_TOP', 'finger_RIGHT', 'finger_BOTTOM', 'thu
     bpy.ops.object.vertex_group_remove_from()
 bpy.ops.mesh.select_all(action='DESELECT')
 
-# Correct sizing for Thumb_6
-if amoeba_style != 'none':
-    bpy.ops.object.vertex_group_set_active(group="BRIDGE_MID")
+bpy.ops.object.mode_set(mode = 'OBJECT')
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+
+
+###########################
+## CONNECT BOTTOM PLATES ##
+###########################
+
+print("{:.2f}".format(time.time()-start_time), "- Connect Finger and Thumb Bottom Plates")
+
+# Join finger_plate and thumb_plate meshes
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_bottom']
+bpy.data.objects["thumb_plate_bottom"].select_set(True)
+bpy.data.objects["finger_plate_bottom"].select_set(True)
+bpy.ops.object.join()
+bpy.context.active_object.name = "body_bottom"
+
+bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+
+for thing in bpy.data.collections["AMEOBA_CUT"].objects:
+    bpy.context.view_layer.objects.active = thing
+    thing.select_set(True)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+bpy.ops.object.select_all(action='DESELECT')
+
+bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
+bpy.data.objects["body_bottom"].select_set(True)
+
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+
+# Bridge connection between plates
+for bridge in ['BRIDGE_MID', 'BRIDGE_LEFT', 'BRIDGE_RIGHT']:
+    bpy.ops.object.vertex_group_set_active(group=bridge)
     bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group="key_finger")
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.mesh.select_all(action='INVERT')
-    bpy.ops.mesh.select_non_manifold()
-    bpy.ops.mesh.select_all(action='INVERT')
-    with suppress_stdout(): bpy.ops.mesh.offset_edges(geometry_mode='move', width=2, angle=0, caches_valid=False)
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.quads_convert_to_tris(ngon_method='BEAUTY')
     bpy.ops.mesh.select_all(action='DESELECT')
+
+bpy.ops.transform.edge_crease(value=0.5)
+bpy.ops.mesh.select_all(action='DESELECT')
+
+bpy.ops.mesh.select_non_manifold()
+bpy.ops.mesh.select_all(action='INVERT')
+
+for group in ['finger_LEFT', 'finger_TOP', 'finger_RIGHT', 'finger_BOTTOM', 'thumb_BOTTOM', 'thumb_LEFT', 'thumb_RIGHT', 'RING_0']:
+    bpy.ops.object.vertex_group_set_active(group=group)
+    bpy.ops.object.vertex_group_remove_from()
+bpy.ops.mesh.select_all(action='DESELECT')
 
 bpy.ops.object.mode_set(mode = 'OBJECT')
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+
+bpy.context.view_layer.objects.active = bpy.data.objects['body']
+bpy.data.objects["body"].select_set(True)
+
+
+if amoeba_style != 'none':
+
+    # Correct Amoeba Left
+
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BL")
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.mesh.select_all(action='INVERT')
+    bpy.ops.mesh.select_more()
+    bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(nrows-2))
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BL")
+    bpy.ops.object.vertex_group_select()
+
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.poke()
+    bpy.ops.mesh.select_less()
+    bpy.ops.object.vertex_group_set_active(group="RING_0")
+    bpy.ops.object.vertex_group_assign()
+
+    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+    grid_mesh.verts.ensure_lookup_table()
+    for vertex in grid_mesh.verts:
+        if vertex.select:
+            vertex.co = bpy.data.objects["ameoba_cut - 0, " + str(nrows-2)].data.vertices[1].co
+            
+            
+    bpy.context.scene.cursor.location = bpy.data.objects["axis - 0, " + str(nrows-2)].location
+    bpy.context.scene.cursor.rotation_euler =  bpy.data.objects["axis - 0, " + str(nrows-2)].rotation_euler
+    bpy.ops.transform.translate(value=(0, -body_thickness+0.1*body_subsurf_level, 0), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
+    bpy.context.scene.cursor.location =  [0, 0, 0]
+    bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
+
+
+
+    bpy.ops.object.vertex_group_set_active(group="RING_0")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_more()
+    bpy.ops.mesh.tris_convert_to_quads()
+    bpy.ops.transform.edge_crease(value=-1)
+    bpy.ops.transform.edge_crease(value=0.5)
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+
+
+
+
+    # Correct Amoeba Middle ***TODO - STILL NEEDS WORK***
+
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_set_active(group="BRIDGE_MID")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="BRIDGE_RIGHT_RING_0")
+    bpy.ops.object.vertex_group_deselect()
+
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.poke()
+    bpy.ops.mesh.select_less()
+    bpy.ops.object.vertex_group_set_active(group="RING_0")
+    bpy.ops.object.vertex_group_assign()
+
+
+    grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
+    grid_mesh.verts.ensure_lookup_table()
+    for vertex in grid_mesh.verts:
+        if vertex.select:
+            vertex.co = bpy.data.objects["ameoba_cut - thumb - 5"].data.vertices[3].co
+
+
+            
+    bpy.context.scene.cursor.location = bpy.data.objects["axis - thumb - 5"].location
+    bpy.context.scene.cursor.rotation_euler =  bpy.data.objects["axis - thumb - 5"].rotation_euler
+    bpy.ops.transform.translate(value=(body_thickness+0.1*body_subsurf_level, 5+body_thickness+0.1*body_subsurf_level, 0), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
+    bpy.context.scene.cursor.location =  [0, 0, 0]
+    bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
+
+
+    bpy.ops.object.vertex_group_set_active(group="RING_0")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_more()
+    bpy.ops.mesh.tris_convert_to_quads()
+    bpy.ops.transform.edge_crease(value=-1)
+    bpy.ops.transform.edge_crease(value=0.5)
+    bpy.ops.mesh.select_all(action='DESELECT')
+
+    bpy.ops.object.mode_set(mode = 'OBJECT')
 
 
 
@@ -768,6 +1002,11 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 ################
 
 print("{:.2f}".format(time.time()-start_time), "- Generate Body Walls")
+
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['body']
+bpy.data.objects["body"].select_set(True)
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 
@@ -881,6 +1120,53 @@ bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 
 
 
+#######################
+## CASE WALLS BOTTOM ##
+#######################
+
+print("{:.2f}".format(time.time()-start_time), "- Generate Body Walls")
+
+bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_axis_ortho":'X', "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_elements":{'INCREMENT'}, "use_snap_project":False, "snap_target":'CLOSEST', "use_snap_self":True, "use_snap_edit":True, "use_snap_nonedit":True, "use_snap_selectable":False, "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "view2d_edge_pan":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.flip_normals()
+bpy.ops.mesh.select_all(action='INVERT')
+bpy.ops.mesh.select_more()
+bpy.ops.mesh.delete(type='VERT')
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.context.view_layer.objects.active = bpy.data.objects['body_bottom']
+bpy.data.objects["body_bottom"].select_set(True)
+
+bpy.ops.object.join()
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_non_manifold()
+
+bpy.ops.object.vertex_group_set_active(group="RING_3")
+bpy.ops.object.vertex_group_deselect()
+bpy.ops.mesh.bridge_edge_loops()
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.ops.object.modifier_add(type='SHRINKWRAP')
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_2"
+bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+
+
+
+bpy.ops.object.modifier_add(type='SHRINKWRAP')
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_3"
+bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+
+
+
 ###########################
 ## Form Switch Locations ##
 ###########################
@@ -912,6 +1198,16 @@ bpy.data.objects["body"].select_set(True)
 
 
 if geode_mode:
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_set_active(group="RING_2")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="RING_3")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.subdivide()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
     body_subsurf_level=3
     bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":True, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
     bpy.ops.object.mode_set(mode = 'EDIT')
@@ -929,17 +1225,22 @@ if geode_mode:
     bpy.ops.object.vertex_group_deselect()
     bpy.ops.object.vertex_group_set_active(group="key_thumb")
     bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group="RING_0")
+    bpy.ops.object.vertex_group_select()
 
-    for x in range(5):
+    for x in range(1):
         bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+        bpy.ops.transform.vertex_random(offset=geode_offset, uniform=1, normal=0, seed=geode_seed)
+        bpy.ops.mesh.beautify_fill(angle_limit=0.523599)
         bpy.ops.mesh.subdivide(number_cuts=1, smoothness=1, ngon=True, quadcorner='INNERVERT')
-        bpy.ops.mesh.decimate(ratio=.333)
+        bpy.ops.mesh.decimate(ratio=geode_ratio)
+
+        
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
     bpy.ops.object.modifier_add(type='SHRINKWRAP')
-    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'PROJECT'
-    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'ON_SURFACE'
-    bpy.context.object.modifiers["Shrinkwrap"].cull_face = 'FRONT'
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'OUTSIDE'
     bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body.001"]
     bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
     
@@ -962,11 +1263,8 @@ bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
 bpy.ops.object.vertex_group_assign_new()
 bpy.data.objects['body'].vertex_groups['Group'].name = "all"
 bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.mesh.select_non_manifold()
-bpy.ops.object.vertex_group_assign_new()
-bpy.data.objects["body"].vertex_groups['Group'].name = 'bottom_non_manifold'
-bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.object.mode_set(mode = 'OBJECT')
+
 
 bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
@@ -982,11 +1280,70 @@ if (body_subsurf_level>0):
     bpy.ops.object.modifier_apply(modifier="Subdivision")
 
 if geode_mode:
-    bpy.ops.object.modifier_add(type='SHRINKWRAP')
-    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
-    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
-    bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
-    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+    
+    bpy.ops.mesh.primitive_cube_add(size=400, enter_editmode=False, align='WORLD', location=(0, 0, -200 - 30), scale=(1, 1, 1))
+    bpy.context.selected_objects[0].name = "cut_cube"
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects['body']
+    bpy.data.objects['body'].select_set(True)
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.delete(type='FACE')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects['body_inner']
+    bpy.data.objects['body_inner'].select_set(True)
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body_inner'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.delete(type='FACE')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["cut_cube"].select_set(True)
+    with suppress_stdout(): bpy.ops.object.delete()
+    
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects['body_inner']
+    bpy.data.objects['body_inner'].select_set(True)
+
+    
+    offset = 0
+    offset_increment = .1
+    while offset < body_thickness:
+        bpy.ops.object.modifier_add(type='SHRINKWRAP')
+        bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+        bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'ABOVE_SURFACE'
+        bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+        bpy.context.object.modifiers["Shrinkwrap"].offset = -offset
+        bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+        
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.mesh.dissolve_degenerate(threshold=offset_increment)
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        offset+=offset_increment
+
+
 
 bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked":False, "mode":'TRANSLATION'}, TRANSFORM_OT_translate={"value":(0, 0, 0), "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(False, False, False), "mirror":True, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
 bpy.ops.object.modifier_add(type='SOLIDIFY')
@@ -1010,17 +1367,13 @@ bpy.context.selected_objects[0].name = "body_inner_reference"
 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
 bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
-bpy.data.objects["body_inner"].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
+bpy.data.objects["body_bottom"].select_set(True)
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.object.vertex_group_assign_new()
-bpy.data.objects['body_inner'].vertex_groups['Group'].name = "all_inside"
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.mesh.select_non_manifold()
-bpy.ops.object.vertex_group_assign_new()
-bpy.data.objects["body_inner"].vertex_groups['Group'].name = 'bottom_non_manifold'
+bpy.data.objects['body_bottom'].vertex_groups['Group'].name = "all_inside"
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.object.mode_set(mode = 'OBJECT')
 
@@ -1051,28 +1404,97 @@ bpy.ops.mesh.edge_face_add()
 bpy.ops.object.mode_set(mode = 'OBJECT')
 
 
+
+
+#Clean Up Vertex Groups
+bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 bpy.data.objects["body"].select_set(True)
 
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.vertex_group_set_active(group="RING_0")
+bpy.ops.object.vertex_group_select()
+bpy.ops.object.vertex_group_set_active(group="key_finger")
+bpy.ops.object.vertex_group_remove_from()
+
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.vertex_group_set_active(group="RING_0")
+bpy.ops.object.vertex_group_select()
+bpy.ops.object.vertex_group_set_active(group="key_thumb")
+bpy.ops.object.vertex_group_remove_from()
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
+bpy.data.objects["body_inner"].select_set(True)
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.vertex_group_set_active(group="RING_0")
+bpy.ops.object.vertex_group_select()
+bpy.ops.object.vertex_group_set_active(group="key_finger")
+bpy.ops.object.vertex_group_remove_from()
+
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.vertex_group_set_active(group="RING_0")
+bpy.ops.object.vertex_group_select()
+bpy.ops.object.vertex_group_set_active(group="key_thumb")
+bpy.ops.object.vertex_group_remove_from()
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.ops.mesh.print3d_clean_non_manifold()
+bpy.ops.mesh.print3d_clean_non_manifold()
+bpy.ops.mesh.print3d_clean_non_manifold()
+bpy.ops.mesh.print3d_clean_non_manifold()
+bpy.ops.mesh.print3d_clean_non_manifold()
+bpy.ops.mesh.print3d_clean_non_manifold()
+bpy.ops.mesh.print3d_clean_non_manifold()
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+bpy.data.objects["body"].select_set(True)
+
+
+
+
 for projection_type in [['body',       'keycap_projection_outer', mount_thickness + 2, 'all'       ],
-                        ['body',       'switch_projection'      , mount_thickness,     'all'       ],
-                        ['body_inner', 'keycap_projection_inner', mount_thickness,     'all_inside'],
-                        ['body_inner', 'switch_projection_inner', amoeba_position[2],  'all_inside']]:
+                        ['body',       'switch_projection'      , mount_thickness,     'all'       ]]:#,
+                        #['body_bottom', 'keycap_projection_inner', mount_thickness,     'all_inside']]:#,
+                        #['body_bottom', 'switch_projection_inner', amoeba_position[2],  'all_inside']]:
     
     if projection_type[1] in ['keycap_projection_inner', 'switch_projection_inner']:
         bpy.ops.object.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode = 'EDIT')
         bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.mode_set(mode = 'OBJECT') 
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        
+        #if projection_type[1] in ['switch_projection_inner']:
+        for column in range(ncols):
+            bpy.ops.object.select_all(action='DESELECT')
+            bpy.context.view_layer.objects.active = bpy.data.objects[projection_type[1] + ' - ' + str(column) + ', 0']
+            for row in range(nrows):
+                if (column in [2, 3]) or (not row == lastrow):
+                    bpy.data.objects[projection_type[1] + ' - '  + str(column) + ', ' + str(row)].select_set(True)
+            bpy.ops.object.join()
+            bpy.ops.object.mode_set(mode = 'EDIT')
+            bpy.ops.mesh.convex_hull()
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode = 'OBJECT')
         
         bpy.context.view_layer.objects.active = bpy.data.objects[projection_type[0]]
         bpy.data.objects[projection_type[0]].select_set(True)
+        
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
         bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections[projection_type[1].upper()]
         bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-        bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
+        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
         bpy.ops.object.modifier_apply(modifier="Boolean")
             
     for thing in bpy.data.collections[projection_type[1].upper()].objects:
@@ -1130,26 +1552,53 @@ for projection_type in [['body',       'keycap_projection_outer', mount_thicknes
 
         bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode = 'OBJECT')
+        
 
-bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
-bpy.data.objects["body_inner"].select_set(True)
+
+bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
+bpy.data.objects["body_bottom"].select_set(True)
+bpy.ops.mesh.print3d_clean_non_manifold()
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.mesh.flip_normals()
 bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+
+bpy.ops.object.vertex_group_set_active(group="RING_2")
 bpy.ops.object.vertex_group_select()
-bpy.ops.mesh.delete(type='FACE')
+bpy.ops.object.vertex_group_set_active(group="RING_3")
+bpy.ops.object.vertex_group_select()
+bpy.ops.mesh.subdivide(number_cuts=2**3)
+bpy.ops.mesh.select_all(action='DESELECT')
+
+
 bpy.ops.object.mode_set(mode = 'OBJECT')
 
 bpy.context.scene.cursor.location =  [0, 0, 0]
 bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
 bpy.ops.object.select_all(action='DESELECT')
 
+
+
+bpy.ops.object.modifier_add(type='SHRINKWRAP')
+bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'OUTSIDE'
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_2"
+bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+
+bpy.ops.object.modifier_add(type='SHRINKWRAP')
+bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'OUTSIDE'
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_3"
+bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+
+
 bpy.ops.object.modifier_add(type='SHRINKWRAP')
 bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
 bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
-bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body_inner_reference"]
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
 bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
 
@@ -1202,6 +1651,7 @@ if loligagger_port:
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'INTERSECT'
+        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["body"]
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -1260,11 +1710,11 @@ if loligagger_port:
         bpy.context.selected_objects[0].name = "holder_outside"
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
         bpy.ops.object.select_all(action='DESELECT')
-        bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
-        bpy.data.objects["body_inner"].select_set(True)
+        bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
+        bpy.data.objects["body_bottom"].select_set(True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
-        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
         bpy.ops.object.modifier_apply(modifier="Boolean")
         bpy.ops.object.mode_set(mode = 'EDIT')
@@ -1278,13 +1728,13 @@ if loligagger_port:
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.inset(thickness=0, depth=0)
         bpy.ops.object.vertex_group_assign_new()
-        bpy.data.objects['body_inner'].vertex_groups['Group'].name = "holder_inside"
+        bpy.data.objects['body_bottom'].vertex_groups['Group'].name = "holder_inside"
         bpy.ops.transform.resize(value=(1, 0, 1), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
 
         
         bpy.ops.object.mode_set(mode = 'OBJECT')
         bpy.ops.mesh.primitive_plane_add(size=200, enter_editmode=False, align='WORLD', location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_width/2, -6, (holder_height - bottom_thickness - 20)/2)), rotation=(-1.5708, 0, 0), scale=(1, 1, 1))
-        bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
+        bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
           
         bpy.ops.object.modifier_add(type='SHRINKWRAP')
         bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
@@ -1328,24 +1778,120 @@ print("{:.2f}".format(time.time()-start_time), "- Join Inner and Outer Body Mesh
 bpy.ops.mesh.primitive_cube_add(size=400, enter_editmode=False, align='WORLD', location=(0, 0, -200 - bottom_thickness), scale=(1, 1, 1))
 bpy.context.selected_objects[0].name = "cut_cube"
 
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['body']
+bpy.data.objects['body'].select_set(True)
+
+bpy.ops.object.modifier_add(type='BOOLEAN')
+bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
+bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+bpy.ops.object.modifier_apply(modifier="Boolean")
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.object.vertex_group_assign_new()
+bpy.data.objects['body'].vertex_groups['Group'].name = 'bottom_non_manifold'
+bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+bpy.ops.object.vertex_group_assign()
+bpy.ops.mesh.delete(type='FACE')
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['cut_cube']
+bpy.data.objects['cut_cube'].select_set(True)
+bpy.ops.transform.translate(value=(0, 0, bottom_thickness), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['body_bottom']
+bpy.data.objects['body_bottom'].select_set(True)
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.mesh.bridge_edge_loops()
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+
+
+bpy.ops.object.modifier_add(type='BOOLEAN')
+bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
+bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+bpy.ops.object.modifier_apply(modifier="Boolean")
+
+
+bpy.ops.object.mode_set(mode = 'EDIT')
+bpy.ops.object.vertex_group_assign_new()
+bpy.data.objects['body_bottom'].vertex_groups['Group'].name = 'bottom_non_manifold'
+bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+bpy.ops.object.vertex_group_assign()
+bpy.ops.mesh.delete(type='FACE')
+
+
+
+bpy.ops.object.vertex_group_set_active(group="all_inside")
+bpy.ops.object.vertex_group_select()
+bpy.ops.mesh.select_all(action='INVERT')
+
+
+bpy.ops.transform.translate(value=(-0, -0, -bottom_thickness+0.1), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+bpy.ops.object.mode_set(mode = 'OBJECT')
+bpy.ops.object.modifier_add(type='SHRINKWRAP')
+bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'PROJECT'
+bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+bpy.context.object.modifiers["Shrinkwrap"].project_limit = body_thickness
+bpy.context.object.modifiers["Shrinkwrap"].use_project_x = True
+bpy.context.object.modifiers["Shrinkwrap"].use_project_y = True
+bpy.context.object.modifiers["Shrinkwrap"].use_project_z = False
+bpy.context.object.modifiers["Shrinkwrap"].use_negative_direction = True
+bpy.context.object.modifiers["Shrinkwrap"].use_positive_direction = True
+bpy.context.object.modifiers["Shrinkwrap"].cull_face = 'OFF'
+bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "bottom_non_manifold"
+bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+bpy.ops.object.mode_set(mode = 'EDIT')
+
+bpy.ops.transform.translate(value=(-0, -0, bottom_thickness-0.1), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+bpy.ops.object.vertex_group_remove_from()
+
+bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(-0, -0, -bottom_thickness), "orient_axis_ortho":'X', "orient_type":'GLOBAL', "orient_matrix":((1, 0, 0), (0, 1, 0), (0, 0, 1)), "orient_matrix_type":'GLOBAL', "constraint_axis":(True, True, True), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "view2d_edge_pan":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
+
+bpy.ops.object.vertex_group_assign()
+
+bpy.ops.object.mode_set(mode = 'OBJECT')
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['cut_cube']
+bpy.data.objects['cut_cube'].select_set(True)
+bpy.ops.transform.translate(value=(0, 0, -bottom_thickness), orient_axis_ortho='X', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
+
+
+
 if loligagger_port:
     bpy.ops.object.select_all(action='DESELECT')
     bpy.data.objects["holder_outside_fairing"].select_set(True)
     bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
     bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
+
+
 bpy.ops.object.select_all(action='DESELECT')
 bpy.data.objects["body"].select_set(True)
-bpy.data.objects["body_inner"].select_set(True)
+bpy.data.objects["body_bottom"].select_set(True)
 bpy.context.view_layer.objects.active = bpy.data.objects['body']
 bpy.ops.object.join()
+
+
 
 bpy.ops.object.select_all(action='DESELECT')
 
 for mesh_object in bpy.context.scene.objects:
-    if 'body.' in mesh_object.name or 'body_inner.' in mesh_object.name:
+    if 'body.' in mesh_object.name or 'body_inner' in mesh_object.name:
         mesh_object.select_set(True)
         with suppress_stdout(): bpy.ops.object.delete()
 
@@ -1357,7 +1903,8 @@ bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.object.vertex_group_set_active(group='bottom_non_manifold')
 bpy.ops.object.vertex_group_select()
 bpy.ops.mesh.fill()
-bpy.ops.object.vertex_group_remove_from()
+
+
 
 bpy.ops.mesh.select_all(action='DESELECT')
 with suppress_stdout():
@@ -1366,13 +1913,6 @@ with suppress_stdout():
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.object.mode_set(mode = 'OBJECT')
 
-bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects['body']
-bpy.data.objects['body'].select_set(True)
-bpy.ops.object.modifier_add(type='BOOLEAN')
-bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
-bpy.context.object.modifiers["Boolean"].solver = 'FAST'
-bpy.ops.object.modifier_apply(modifier="Boolean")
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.object.vertex_group_assign()
@@ -1384,6 +1924,8 @@ for vertex in grid_mesh.verts:
 bpy.ops.object.vertex_group_deselect()
 bpy.ops.mesh.delete(type='VERT')
 bpy.ops.object.mode_set(mode = 'OBJECT')
+
+
 
 bpy.ops.object.select_all(action='DESELECT')
 bpy.data.objects["cut_cube"].select_set(True)
@@ -1408,13 +1950,14 @@ bpy.ops.object.mode_set(mode = 'OBJECT')
 
 
 
+
 ###########################
 ## GENERATE BOTTOM PLATE ##
 ###########################
 
 print("{:.2f}".format(time.time()-start_time), "- Generate Bottom Plate")
 
-# Clip off protusions into bottom
+
 bpy.ops.object.select_all(action='DESELECT')
 bpy.context.view_layer.objects.active = bpy.data.objects['body']
 bpy.data.objects['body'].select_set(True)
@@ -1422,165 +1965,49 @@ bpy.data.objects['body'].select_set(True)
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
 
-for column in range(ncols):
-    for row in range(nrows):
-        if (column in [2, 3]) or (not row == lastrow):
-            bpy.ops.object.vertex_group_set_active(group="switch_projection - " + str(column) + ", " + str(row))
-            bpy.ops.object.vertex_group_select()
-
-for thumb in range(6):
-    bpy.ops.object.vertex_group_set_active(group="switch_projection - thumb - " + str(thumb))
-    bpy.ops.object.vertex_group_select()
-
-bpy.ops.mesh.select_more()
+bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+bpy.ops.object.vertex_group_select()
+bpy.ops.mesh.delete(type='FACE')
+bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+bpy.ops.object.vertex_group_select()
 bpy.ops.object.vertex_group_set_active(group="all")
 bpy.ops.object.vertex_group_deselect()
-
-grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-for vertex in grid_mesh.verts:
-    if vertex.select and vertex.co[2] <= 0.1:
-        vertex.co[2] = 0.1
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.object.mode_set(mode = 'OBJECT')
-
-bpy.ops.object.mode_set(mode = 'EDIT')
-
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.object.vertex_group_set_active(group='all_inside')
-bpy.ops.object.vertex_group_select()
-bpy.ops.object.vertex_group_set_active(group='bottom_non_manifold')
-bpy.ops.object.vertex_group_deselect()
-bpy.ops.object.vertex_group_set_active(group='all')
-bpy.ops.object.vertex_group_select()
-bpy.ops.mesh.select_all(action='INVERT')
-
-
-with suppress_stdout():
-    bpy.ops.mesh.remove_doubles(threshold=0.2)
-    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-0.01, angle=0, caches_valid=False, angle_presets='0°')
-bpy.ops.mesh.edge_face_add()
-bpy.ops.mesh.separate(type='LOOSE')
-        
-bpy.ops.object.mode_set(mode = 'OBJECT')
-bpy.ops.object.select_all(action='DESELECT')
-
-mesh_size = len(bpy.data.objects['body.001'].data.vertices)
-for mesh_object in bpy.context.scene.objects:
-    if 'body.001' == mesh_object.name:
-        continue
-    elif 'body.' in mesh_object.name:
-        if len(mesh_object.data.vertices) > mesh_size:
-            bpy.data.objects['body.001'].select_set(True)
-            with suppress_stdout(): bpy.ops.object.delete()
-            mesh_object.name = 'body.001'
-            mesh_size = len(mesh_object.data.vertices)
-        else:
-            mesh_object.select_set(True)
-            with suppress_stdout(): bpy.ops.object.delete()
-
-bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["body.001"]
-bpy.data.objects["body.001"].select_set(True)
-bpy.context.selected_objects[0].name = "bottom_cut"
-
-bpy.ops.object.mode_set(mode = 'EDIT')
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.object.vertex_group_assign_new()
-bpy.data.objects['bottom_cut'].vertex_groups['Group'].name = 'bottom_lower'
-
-bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(0, 0, 2.5), "orient_type":'GLOBAL', "orient_matrix":((0, 1, 0), (1, 0, 0), (0, 0, 1)), "orient_matrix_type":'NORMAL', "constraint_axis":(True, True, True), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
-bpy.ops.object.vertex_group_remove()
-bpy.ops.object.vertex_group_assign_new()
-bpy.data.objects['bottom_cut'].vertex_groups['Group'].name = 'bottom_upper'
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.mesh.normals_make_consistent(inside=False)
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.object.mode_set(mode = 'OBJECT')
-
-bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["body"]
-bpy.data.objects["body"].select_set(True)
-bpy.ops.object.mode_set(mode = 'EDIT')
-
-bpy.ops.mesh.select_all(action='DESELECT')
-bpy.ops.object.vertex_group_set_active(group='all_inside')
-bpy.ops.object.vertex_group_select()
-bpy.ops.object.vertex_group_set_active(group='bottom_non_manifold')
-bpy.ops.object.vertex_group_deselect()
-bpy.ops.object.vertex_group_set_active(group='all')
-bpy.ops.object.vertex_group_select()
-bpy.ops.mesh.select_all(action='INVERT')
 
 with suppress_stdout():
     bpy.ops.mesh.remove_doubles(threshold=0.2)
     bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-0.2, angle=0, caches_valid=False, angle_presets='0°')
 bpy.ops.mesh.edge_face_add()
-bpy.ops.mesh.separate(type='LOOSE')
-        
+bpy.ops.mesh.separate(type='SELECTED')
 bpy.ops.object.mode_set(mode = 'OBJECT')
-bpy.ops.object.select_all(action='DESELECT')
-
-mesh_size = len(bpy.data.objects['body.001'].data.vertices)
-for mesh_object in bpy.context.scene.objects:
-    if 'body.001' == mesh_object.name:
-        continue
-    elif 'body.' in mesh_object.name:
-        if len(mesh_object.data.vertices) > mesh_size:
-            bpy.data.objects['body.001'].select_set(True)
-            with suppress_stdout(): bpy.ops.object.delete()
-            mesh_object.name = 'body.001'
-            mesh_size = len(mesh_object.data.vertices)
-        else:
-            mesh_object.select_set(True)
-            with suppress_stdout(): bpy.ops.object.delete()
 
 bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["body.001"]
-bpy.data.objects["body.001"].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects['body.001']
+bpy.data.objects['body.001'].select_set(True)
 bpy.context.selected_objects[0].name = "bottom"
 
 bpy.ops.object.mode_set(mode = 'EDIT')
 bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.remove_doubles(threshold=0.2)
+bpy.ops.object.vertex_group_remove(all=True)
 bpy.ops.object.vertex_group_assign_new()
 bpy.data.objects['bottom'].vertex_groups['Group'].name = 'bottom_lower'
-
-bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(0, 0, 2.5), "orient_type":'GLOBAL', "orient_matrix":((0, 1, 0), (1, 0, 0), (0, 0, 1)), "orient_matrix_type":'NORMAL', "constraint_axis":(True, True, True), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
-bpy.ops.object.vertex_group_remove()
+bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"use_normal_flip":False, "use_dissolve_ortho_edges":False, "mirror":False}, TRANSFORM_OT_translate={"value":(0, 0, bottom_thickness), "orient_axis_ortho":'X', "orient_type":'NORMAL', "orient_matrix":((1.01347e-07, 1, 1.81183e-10), (-1, 1.01347e-07, 4.57152e-09), (4.57152e-09, -1.81183e-10, 1)), "orient_matrix_type":'NORMAL', "constraint_axis":(True, True, True), "mirror":False, "use_proportional_edit":False, "proportional_edit_falloff":'SMOOTH', "proportional_size":1, "use_proportional_connected":False, "use_proportional_projected":False, "snap":False, "snap_target":'CLOSEST', "snap_point":(0, 0, 0), "snap_align":False, "snap_normal":(0, 0, 0), "gpencil_strokes":False, "cursor_transform":False, "texture_space":False, "remove_on_cancel":False, "view2d_edge_pan":False, "release_confirm":False, "use_accurate":False, "use_automerge_and_split":False})
 bpy.ops.object.vertex_group_assign_new()
 bpy.data.objects['bottom'].vertex_groups['Group'].name = 'bottom_upper'
-
-bpy.ops.mesh.select_all(action='SELECT')
-bpy.ops.mesh.normals_make_consistent(inside=False)
-bpy.ops.mesh.select_all(action='DESELECT')
-
 bpy.ops.object.mode_set(mode = 'OBJECT')
+
+
+bpy.ops.object.select_all(action='DESELECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['body']
+bpy.data.objects['body'].select_set(True)
 
 bpy.ops.object.mode_set(mode = 'EDIT')
-grid_mesh = bmesh.from_edit_mesh(bpy.context.object.data)
-for vertex in grid_mesh.verts:
-    if vertex.select:
-        vertex.co[2] = -0.5
+bpy.ops.mesh.select_all(action='DESELECT')
+
+bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+bpy.ops.object.vertex_group_select()
+bpy.ops.mesh.fill()
 bpy.ops.object.mode_set(mode = 'OBJECT')
-
-bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["bottom"]
-bpy.data.objects["bottom"].select_set(True)
-
-bpy.ops.object.select_all(action='DESELECT')
-bpy.context.view_layer.objects.active = bpy.data.objects["body"]
-bpy.data.objects["body"].select_set(True)
-
-bpy.ops.object.modifier_add(type='BOOLEAN')
-bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["bottom_cut"]
-bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
-bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-
-bpy.ops.object.modifier_apply(modifier="Boolean")
-
-bpy.ops.object.select_all(action='DESELECT')
-bpy.data.objects["body_inner_reference"].select_set(True)
-bpy.data.objects["bottom_cut"].select_set(True)
-with suppress_stdout(): bpy.ops.object.delete()
 
 
 
@@ -1950,7 +2377,7 @@ if magnet_bottom:
 
     bpy.ops.object.select_all(action='DESELECT')
 
-    bpy.ops.mesh.primitive_cylinder_add(vertices=50, radius=magnet_diameter/2 + 1, depth=magnet_height+2, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+    bpy.ops.mesh.primitive_cylinder_add(vertices=50, radius=magnet_diameter/2 + body_thickness, depth=magnet_height+body_thickness, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     bpy.context.active_object.name = 'mag_template'
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
@@ -2126,14 +2553,12 @@ if magnet_bottom:
     bpy.context.object.modifiers["Boolean"].solver = 'FAST'
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
-
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["mag_h"]
-    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
     bpy.ops.object.modifier_apply(modifier="Boolean")
-
-
+    
     bpy.context.view_layer.objects.active = bpy.data.objects["maghole"]
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.transform.shrink_fatten(value=1, use_even_offset=False, mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
@@ -2151,7 +2576,7 @@ if magnet_bottom:
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["mag_h"]
-    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
@@ -2236,7 +2661,7 @@ for object in ['stopper_projection', 'bottom_stopper']:
     bpy.data.objects[object].select_set(True)
 with suppress_stdout(): bpy.ops.object.delete()
 
-    
+
 
 #########################
 ## Create Switch Holes ##
@@ -2249,7 +2674,7 @@ bpy.data.objects['body'].select_set(True)
 
 bpy.ops.object.modifier_add(type='BOOLEAN')
 bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
-bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
 bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
 bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE"]
 bpy.ops.object.modifier_apply(modifier="Boolean")
@@ -2263,15 +2688,28 @@ bpy.ops.object.modifier_apply(modifier="Boolean")
 if amoeba_style != 'none':
     print("{:.2f}".format(time.time()-start_time), "- Add Ameoba Cuts")
 
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
     bpy.data.objects['body'].select_set(True)
 
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
-    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
     bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
     bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["AMEOBA_CUT"]
     bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects["bottom"]
+    bpy.data.objects['bottom'].select_set(True)
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
+    bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["AMEOBA_CUT"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
 
 
 
@@ -2282,6 +2720,7 @@ if amoeba_style != 'none':
 if switch_support:
     print("{:.2f}".format(time.time()-start_time), "- Add Switch Supports")
     
+    bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
     bpy.data.objects['body'].select_set(True)
     
