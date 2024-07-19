@@ -16,7 +16,7 @@ This script is very much a work-in-progress. It is easy to select a set of param
 ## Generating a Design
 
 **Install Blender**
-* Install the latest version of Blender  [(Currently tested on version 4.1.1)](https://www.blender.org/download/)
+* Install the latest version of Blender  [(Currently tested on version 4.2 LTS)](https://www.blender.org/download/)
 
 **Load Script**
 * Open Blender and delete the initial collections and objects (i.e., Collection, Camera, Cube, & Light)
@@ -24,8 +24,8 @@ This script is very much a work-in-progress. It is easy to select a set of param
 * Either Copy-Paste the code into a new file *or* load [src/blended-dm.py](src/blended-dm.py)
 * *Optional:* Open Console Window to observe output
 * *Optional:* Edit parameters near beginning of file as desired. Increasing `body_subsurf_level` will increase the body smoothness but drastically increase generation time.
-* Run the scrpt by pressing the **PLAY** button
-* If objectes generated correctly, export as .stl (located under File menu)
+* Run the script by pressing the **PLAY** button
+* If the objects generated correctly, export as .stl (located under File menu)
 
 
 
@@ -47,6 +47,6 @@ Special thanks goes out to [Joshua Shreve](https://github.com/joshreve), whose P
 
 ## License
 
-Copyright © 2015-2021 Matthew Adereth, Tom Short, and Sean Gilroy
+Copyright © 2015-2024 Matthew Adereth, Tom Short, and Sean Gilroy
 
 The source code for generating the models (everything excluding the [things/](things/) and [resources/](resources/) directories is distributed under the [GNU AFFERO GENERAL PUBLIC LICENSE Version 3](LICENSE).  The generated models and PCB designs are distributed under the [Creative Commons Attribution-NonCommercial-ShareAlike License Version 3.0](LICENSE-models).
