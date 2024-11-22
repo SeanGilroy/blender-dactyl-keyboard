@@ -16,7 +16,7 @@ This script is very much a work-in-progress. It is easy to select a set of param
 ## Generating a Design
 
 **Install Blender**
-* Install the latest version of Blender  [(Currently tested on version 4.2 LTS)](https://www.blender.org/download/)
+* Install the latest version of Blender  [(Currently tested on version 4.3.0)](https://www.blender.org/download/)
 
 **Load Script**
 * Open Blender and delete the initial collections and objects (i.e., Collection, Camera, Cube, & Light)
@@ -25,6 +25,7 @@ This script is very much a work-in-progress. It is easy to select a set of param
 * *Optional:* Open Console Window to observe output
 * *Optional:* Edit parameters near beginning of file as desired. Increasing `body_subsurf_level` will increase the body smoothness but drastically increase generation time.
 * Run the script by pressing the **PLAY** button
+* *Note:* This script enables extensions available online and installs *3D Print Tooolbox* and *Edit Mesh Tools*.  If running for the first time, these extensions will bw installed, but fail to generate a proper mesh.  Simply run the script a second time to complete the mesh generation.
 * If the objects generated correctly, export as .stl (located under File menu)
 
 

@@ -41,6 +41,7 @@ def main():
     bpy.context.scene.unit_settings.length_unit = 'MILLIMETERS'
     bpy.context.scene.cursor.location =  [0, 0, 0]
     bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
+    bpy.ops.extensions.userpref_allow_online()
     bpy.ops.extensions.package_install(repo_index=0, pkg_id="edit_mesh_tools")
     bpy.ops.extensions.package_install(repo_index=0, pkg_id="print3d_toolbox")
 
