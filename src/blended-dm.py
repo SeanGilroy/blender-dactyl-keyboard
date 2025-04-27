@@ -64,6 +64,7 @@ def main():
     centercol = 3                   # controls left_right tilt / tenting (higher number is more tenting)
     tenting_angle = pi / 15.0       # or, change this for more precise tenting control
     sa_profile_key_height = 12.7
+    seperate_plate_from_body = False
 
     if nrows > 5:
         column_style = "orthographic"
@@ -101,6 +102,7 @@ def main():
     left_wall_x_offset = 2 + wall_xy_offset     # shape of left wall
     left_wall_z_offset = 3                      # shape of left wall
     key_well_offset =  0.5                      # depth of key from body
+    plate_border_0 = 1                          # distance of 1st key plate boarder
 
 
 
@@ -108,14 +110,14 @@ def main():
     ## Shell Parameters and Features ##
     ###################################
 
-    geode_mode = True                # Forces other perameters
+    geode_mode = False                # Forces other perameters
     geode_ratio = 0.1              # Good values ~0.05-0.2
     geode_offset = 0.5
     geode_seed = 0
 
 
     body_thickness = 2
-    body_subsurf_level = 1
+    body_subsurf_level = 3
     relaxed_mesh = True
     switch_support = True
     loligagger_port = True
@@ -166,7 +168,7 @@ def main():
     ## Create Collections ##
     ########################
 
-    for collection in ["AXIS", "KEYCAP_PROJECTION_OUTER", "KEYCAP_PROJECTION_INNER", "SWITCH_PROJECTION", "SWITCH_PROJECTION_INNER", "SWITCH_HOLE", "SWITCH_SUPPORT", "AMEOBA_CUT"]:
+    for collection in ["AXIS", "KEYCAP_PROJECTION_OUTER", "KEYCAP_PROJECTION_INNER", "SWITCH_PROJECTION", "SWITCH_PROJECTION_INNER", "SWITCH_HOLE", "SWITCH_HOLE_LOWER", "SWITCH_SUPPORT", "AMEOBA_CUT"]:
         bpy.context.scene.collection.children.link(bpy.data.collections.new(collection))
 
 
@@ -197,6 +199,7 @@ def main():
                       ['keycap_projection_outer', (0, 0, mount_thickness + 4 + 2), (19, 19*size, 8)],
                       ['keycap_projection_inner', (0, 0, mount_thickness + 4 + 2 - 2), (19+2, 19*size+2, 8)],
                       ['switch_hole', (0, 0, 0), (keyswitch_width, keyswitch_height, 3*mount_thickness)],
+                      ['switch_hole_lower', (0, 0, mount_thickness-2), (5, keyswitch_height + 1, 2)],
                       ['ameoba_cut', amoeba_position, tuple(map(operator.mul, amoeba_size, (1, 1, 2)))],
                       ['nub_cube', ((1.5 / 2) + 0.5*(keyswitch_width-0.01), 0, 0.5*mount_thickness), (1.5, 2.75, mount_thickness - 0.01)]]:
             
@@ -261,6 +264,7 @@ def main():
                              ['SWITCH_PROJECTION',              'switch_projection_1u',              'switch_projection_1u'               ],
                              ['SWITCH_PROJECTION_INNER',        'switch_projection_inner_1u',        'switch_projection_inner_1.5u'       ],
                              ['SWITCH_HOLE',                    'switch_hole_1u',                    'switch_hole_1.5u'                   ],
+                             ['SWITCH_HOLE_LOWER',              'switch_hole_lower_1u',              'switch_hole_lower_1.5u'             ],
                              ['SWITCH_SUPPORT',                 'switch_support_1u',                 'switch_support_1.5u'                ],
                              ['AMEOBA_CUT',                     'ameoba_cut_1u',                     'ameoba_cut_1.5u'                    ]]:
                     bpy.ops.object.select_all(action='DESELECT')
@@ -268,7 +272,7 @@ def main():
                         bpy.ops.object.add_named(name = tool[2])
                         bpy.ops.object.make_single_user(object=True, obdata=True, material=True, animation=False)
                         bpy.context.selected_objects[-1].name = tool[0].lower() + tool_identifier
-                        if tool[0] not in ['AXIS', 'SWITCH_SUPPORT', 'AMEOBA_CUT']:
+                        if tool[0] not in ['AXIS', 'SWITCH_HOLE_LOWER', 'SWITCH_SUPPORT', 'AMEOBA_CUT']:
                             bpy.ops.transform.rotate(value=1.5708, orient_axis='Z', orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='VIEW', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=0.001, use_proportional_connected=False, use_proportional_projected=False)
                     else:
                         bpy.ops.object.add_named(name = tool[1])
@@ -287,7 +291,7 @@ def main():
                     bpy.context.collection.objects.unlink(bpy.data.objects["thumb_orgin"])
 
                 # Select all tools
-                for tool in ['AXIS', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'SWITCH_HOLE', 'SWITCH_SUPPORT', 'AMEOBA_CUT']:
+                for tool in ['AXIS', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'SWITCH_HOLE', 'SWITCH_HOLE_LOWER', 'SWITCH_SUPPORT', 'AMEOBA_CUT']:
                     bpy.data.objects[tool.lower() + tool_identifier].select_set(True)
                 
                 # Apply transfomations to each set tools
@@ -336,6 +340,7 @@ def main():
                      ['SWITCH_PROJECTION',              'switch_projection_1u',              'switch_projection_1.5u'             ],
                      ['SWITCH_PROJECTION_INNER',        'switch_projection_inner_1u',        'switch_projection_inner_1u'         ],
                      ['SWITCH_HOLE',                    'switch_hole_1u',                    'switch_hole_1.5u'                   ],
+                     ['SWITCH_HOLE_LOWER',              'switch_hole_lower_1u',              'switch_hole_lower_1.5u'             ],
                      ['SWITCH_SUPPORT',                 'switch_support_1u',                 'switch_support_1.5u'                ],
                      ['AMEOBA_CUT',                     'ameoba_cut_1u',                     'ameoba_cut_1.5u'                    ]]:
             bpy.ops.object.select_all(action='DESELECT')
@@ -362,7 +367,7 @@ def main():
            
         # Select all tools
         bpy.ops.object.select_all(action='DESELECT')
-        for tool in ['AXIS', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER',  'SWITCH_HOLE', 'SWITCH_SUPPORT', 'AMEOBA_CUT']:
+        for tool in ['AXIS', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER',  'SWITCH_HOLE', 'SWITCH_HOLE_LOWER', 'SWITCH_SUPPORT', 'AMEOBA_CUT']:
             bpy.data.objects[tool.lower() + tool_identifier].select_set(True)
 
         # Apply rotation    
@@ -380,7 +385,7 @@ def main():
 
     bpy.ops.object.select_all(action='DESELECT')
 
-    for shape in ['keycap_projection_outer_', 'keycap_projection_inner_', 'switch_projection_', 'switch_projection_inner_', 'switch_hole_', 'switch_support_', 'ameoba_cut_']:
+    for shape in ['keycap_projection_outer_', 'keycap_projection_inner_', 'switch_projection_', 'switch_projection_inner_', 'switch_hole_', 'switch_hole_lower_', 'switch_support_', 'ameoba_cut_']:
         for size in [1, 1.5]:
             bpy.data.objects[shape + str(size) + 'u' ].select_set(True)
     bpy.data.objects['key_axis'].select_set(True)
@@ -582,18 +587,19 @@ def main():
             bpy.ops.object.vertex_group_assign()
             bpy.ops.mesh.select_all(action='DESELECT')
         
-        for vertex_group_name in ['finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2']:
+        for vertex_group_name in ['finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_row_gap_3']:
             bpy.ops.object.vertex_group_assign_new()
             bpy.data.objects["finger_plate_" + finger_plate].vertex_groups['Group'].name = vertex_group_name
         
         
-        for row in range(nrows-2):
+        for row in range(nrows-1):
             for column in range(2*ncols-1):
                 grid_mesh.faces[2*row+1 + column*(2*nrows-1)].select = True
                 bpy.ops.object.vertex_group_set_active(group='finger_row_gap_' + str(row))
                 
             bpy.ops.object.vertex_group_assign()
             bpy.ops.mesh.select_all(action='DESELECT')
+
                 
 
         for vertex_group_name in ['key_finger', 'finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'RAISE_0', 'RAISE_1', 'RAISE_2', 'RING_0', 'RING_1', 'RING_2', 'RING_3', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0', 'AMEOBA_CORRECT_R1', 'AMEOBA_CORRECT_R2']:
@@ -635,7 +641,7 @@ def main():
         
         # Create temporary vertex groups for adding faces
         for side in [['CORRECTION_1', [nrows*8 - 3,  nrows*10 - 2]],
-                     ['CORRECTION_2', [nrows*16 - 1, nrows*18 - 3]]]:
+                     ['CORRECTION_2', [nrows*16 - 2, nrows*18 - 3]]]:
 
             for vertex in side[1]:
                 grid_mesh.verts[vertex].select = True
@@ -652,7 +658,7 @@ def main():
         bpy.ops.mesh.delete(type='FACE')
         bpy.ops.mesh.select_mode(type="VERT")
         
-        
+
         # Add correction faces
         for side in ['CORRECTION_1', 'CORRECTION_2']:
             bpy.ops.object.vertex_group_set_active(group=side)
@@ -671,6 +677,16 @@ def main():
             bpy.ops.mesh.shortest_path_select(edge_mode='SELECT', use_topology_distance=True)
             bpy.ops.object.vertex_group_assign()
             bpy.ops.mesh.select_all(action='DESELECT')
+        
+        # Correct/remvoe verticies in last row gap group
+        for vertex_group in ["finger_LEFT", "finger_RIGHT", "finger_col_gap_0", "finger_col_gap_4"]:
+            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+            bpy.ops.object.vertex_group_set_active(group="finger_row_gap_3")
+            bpy.ops.object.vertex_group_remove_from()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
 
 
         bpy.ops.object.mode_set(mode = 'OBJECT')
@@ -725,7 +741,7 @@ def main():
                 
             
             if thumb_plate is "bottom":
-                switch_size = 1
+                if amoeba_style != "none": switch_size = 1
                 bpy.ops.transform.resize(value=((amoeba_size[0] + 1) if (amoeba_size[0] + 1) > (mount_height+0.25) else (mount_height+0.25), (amoeba_size[1]*switch_size + 1) if (amoeba_size[1]*switch_size + 1) > (mount_height*switch_size+0.25) else (mount_height*switch_size+0.25), 1))
         
                 bpy.ops.transform.translate(value=-grid_mesh.faces[faces_to_use[thumb]].calc_center_median(), orient_type='GLOBAL')
@@ -745,6 +761,7 @@ def main():
         for vertex_group_name in ['key_thumb', 'thumb_LEFT', 'thumb_RIGHT', 'thumb_BOTTOM', 'thumb_corner_TL', 'thumb_corner_TLL', 'thumb_corner_ML', 'thumb_corner_BL', 'thumb_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0', 'AMEOBA_CORRECT_R1', 'AMEOBA_CORRECT_R2']:
             bpy.ops.object.vertex_group_assign_new()
             bpy.data.objects["thumb_plate_" + thumb_plate].vertex_groups['Group'].name = vertex_group_name
+            
 
         # Remove unused faces
         grid_mesh.faces.ensure_lookup_table()
@@ -765,9 +782,9 @@ def main():
                            [15, 21, 23],
                            [14, 15, 19, 21],
                            [14, 17, 19],
-                           [ 9, 10, 13],
-                           [10, 13, 14],
-                           [13, 14, 17]]:
+                           [ 9, 13, 17],
+                           [10, 14, 17],
+                           [ 9, 10, 17]]:
             for vertex in correction:
                 grid_mesh.verts[vertex].select = True
             if thumb_plate is "bottom" and correction == [ 9, 10, 13, 14, 17]: print(zzz)
@@ -780,7 +797,6 @@ def main():
         bpy.ops.object.vertex_group_set_active(group='key_thumb')
         bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
-
 
 
         # Create vertex group faces
@@ -817,659 +833,518 @@ def main():
         bpy.ops.object.mode_set(mode = 'OBJECT')
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
+
+
+
+
+    #########################################
+    ##  Develop Plate-Body Interface   ######
+    #########################################
+
+    print("{:.2f}".format(time.time()-start_time), "- Develop Plate-Body Interface")
     
-    ######
-    ##  SINK KEYS
-    #####
     
+    # Add buffer around plate boarder for keycap tolerance
     
-    #sunk buffer
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top']
     bpy.ops.object.mode_set(mode = 'EDIT')
     
     
-    for side in [['finger_TOP', ['finger_LEFT', 'finger_RIGHT', 'key_finger']],
-                 ['finger_LEFT', ['finger_TOP', 'key_finger']],
-                 ['finger_RIGHT', ['finger_TOP', 'finger_BOTTOM', 'key_finger']],
-                 ['finger_BOTTOM', ['finger_RIGHT', 'key_finger']]]:
-        bpy.ops.object.vertex_group_set_active(group=side[0])
+    ### Top
+    for column in range(ncols):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')    
+        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 0')
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_row_gap_0')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_remove_from()
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1, follow_face=True, caches_valid=False)
-
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=plate_border_0, follow_face=True, caches_valid=False)
+        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
         bpy.ops.object.vertex_group_assign()
-        for opp_side in side[1]:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+    for column in range(ncols-1):
+        #Fill in between extended edges
+        for vertex_group in ['finger_col_gap_' + str(column)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_row_gap_3', 'finger_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+ 
+    ### Bottom
+    for column in range(ncols):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        if column in [2, 3]:
+            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 4')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_3')
+            bpy.ops.object.vertex_group_select()
+        else:
+            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 3')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_2')
+            bpy.ops.object.vertex_group_select()      
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=plate_border_0, follow_face=True, caches_valid=False)
+        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+    for column in range(ncols-1):
+        #Fill in between extended parts
+        for vertex_group in ['finger_col_gap_' + str(column)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_TOP']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        if column in [2]:
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_3')
+            bpy.ops.object.vertex_group_deselect()
+        if column in [1, 3]:
+            bpy.ops.object.vertex_group_set_active(group='switch - 2, 3')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='switch - 3, 3')
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+
+
+    ### Left
+    for row in range(nrows-1):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_0')
+        bpy.ops.object.vertex_group_select()      
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=plate_border_0, follow_face=True, caches_valid=False)
+        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+        bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
     
-    for corner in [['finger_corner_TL'],
-                  ['finger_corner_TR'],
-                  ['finger_corner_BR']]:
-        bpy.ops.object.vertex_group_set_active(group=corner[0])
-        bpy.ops.object.vertex_group_select()
+    for row in range(nrows-2):
+        #Fill in between extended parts
+        for vertex_group in ['finger_row_gap_' + str(row)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['finger_col_gap_0', 'finger_col_gap_1', 'finger_col_gap_2', 'finger_col_gap_3',  'finger_col_gap_4', 'finger_RIGHT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.select_all(action='DESELECT')
         
-
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_select()
+        
+        
+    ### RIGHT
+    for row in range(nrows-1):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch - 5, ' + str(row))
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_4')
+        bpy.ops.object.vertex_group_select()      
         bpy.ops.mesh.select_all(action='INVERT')
-        bpy.ops.object.vertex_group_set_active(group=corner[0])
-        bpy.ops.object.vertex_group_remove_from()
-        bpy.ops.mesh.select_all(action='DESELECT')
-    
-    
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.object.vertex_group_set_active(group='switch - 2, ' + str(lastrow))
-    bpy.ops.object.vertex_group_deselect()
+        
 
-    
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1, follow_face=True, caches_valid=False)
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-
-    
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='switch - 3, ' + str(lastrow))
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1, follow_face=True, caches_valid=False)
-    bpy.ops.mesh.select_all(action='DESELECT')
-
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.mesh.select_non_manifold()
-    bpy.ops.object.vertex_group_set_active(group='key_finger')
-    bpy.ops.object.vertex_group_remove_from()
-    
-    bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.object.vertex_group_select()
-
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_remove_from()
-
-    bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-    bpy.ops.object.vertex_group_select()
-    
-
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-    bpy.ops.object.vertex_group_remove_from()
-    
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    
-    # Re-Point corners
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_TL')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1/sqrt(2), follow_face=True, caches_valid=False)
-    bpy.ops.transform.resize(value=(0, 0, 0), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_more()
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_TL')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_less()
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_TR')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1/sqrt(2), follow_face=True, caches_valid=False)
-    bpy.ops.transform.resize(value=(0, 0, 0), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_more()
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_TR')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_less()
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BR')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1/sqrt(2), follow_face=True, caches_valid=False)
-    bpy.ops.transform.resize(value=(0, 0, 0), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_more()
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BR')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_less()
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=1/sqrt(2), follow_face=True, caches_valid=False)
-    bpy.ops.transform.resize(value=(0, 0, 0), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_more()
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_less()
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
-
-    
-
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-
-
-    #Raise edge - TOP
-    
-    bpy.ops.object.select_all(action='DESELECT')
-    bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top']
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    
-    for column in range(ncols):
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 0')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=plate_border_0, follow_face=True, caches_valid=False)
         bpy.ops.object.vertex_group_set_active(group='RAISE_0')
         bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    for row in range(nrows-2):
+        #Fill in between extended parts
+        for vertex_group in ['finger_row_gap_' + str(row)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['finger_col_gap_0', 'finger_col_gap_1', 'finger_col_gap_2', 'finger_col_gap_3',  'finger_col_gap_4', 'finger_LEFT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+
+    
+    #Clean Up vertex Groups
+    bpy.ops.object.vertex_group_set_active(group="RAISE_0")
+    bpy.ops.object.vertex_group_select()
+    for vertex_group in ['key_finger']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
         bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    
+    bpy.ops.object.vertex_group_set_active(group="key_finger")
+    bpy.ops.object.vertex_group_select()
+    for vertex_group in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+
+
+    #Correct Corner Groups
+    for vertex_group in ['finger_corner_TL', 'finger_corner_BL', 'finger_corner_TR', 'finger_corner_BR']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_less(use_face_step=False)
+        bpy.ops.mesh.select_all(action='INVERT')
+        bpy.ops.object.vertex_group_remove_from()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
+    # Correct Top/Bottom
+    bpy.ops.object.vertex_group_set_active(group="finger_row_gap_0")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_row_gap_2")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.select_more()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_TR")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_TL")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BR")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BL")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_TOP")
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.object.vertex_group_set_active(group="BRIDGE_LEFT")
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.object.vertex_group_set_active(group="finger_BOTTOM")
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+
+    # Correct Left/Right
+    bpy.ops.object.vertex_group_set_active(group="finger_col_gap_0")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_col_gap_4")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.select_more()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_TR")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_TL")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BR")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BL")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_LEFT")
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.object.vertex_group_set_active(group="finger_RIGHT")
+    bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+
+
+
+    bpy.ops.object.vertex_group_set_active(group="RAISE_0")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=body_thickness*sqrt(2), angle=-0.785398, follow_face=True, caches_valid=False)
+    bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.separate(type="LOOSE")
+    
+    
+    #########################################
+    ##  Lift Edges   ######
+    #########################################
+    
+    
+    ### Top
+    for column in range(ncols):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')    
+        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 0')
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+        #Extrude Border
 
         if column <4:
             bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=(7 + (1-cos(alpha)/2)*column_offset(column)[1] - ( (1-sin(alpha)/2)*column_offset(column)[2])), angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
         else:
             bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+
+        
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
         bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_remove_from()
-        
-        for opp_side in ['finger_LEFT', 'finger_RIGHT', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.mesh.select_all(action='DESELECT')
-        
 
-
-        
     for column in range(ncols-1):
-        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_' + str(column))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-
+        #Fill in between extended edges
+        for vertex_group in ['finger_col_gap_' + str(column)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_row_gap_3', 'finger_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.select_all(action='DESELECT')
         
         
-
-
-    
+        
+    ### Bottom
     for column in range(ncols):
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 0')
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_remove_from()
-
-        if column <4:
-            #bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7+(sin(alpha)/2)*column_offset(column)[1]/2, depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-            bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7 + (1-sin(alpha)/2)*column_offset(column)[1] + (column_offset(column)[2]/2) , depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        if column in [2, 3]:
+            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 4')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_3')
+            bpy.ops.object.vertex_group_select()
         else:
-            bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_remove_from()
-        
-        for opp_side in ['finger_LEFT', 'finger_RIGHT', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        
-
-
-        
-    for column in range(ncols-1):
-        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_' + str(column))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-    
-
-    #Raise edge - LEFT
-
-    for row in range(nrows-1):
-        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
-        bpy.ops.object.vertex_group_select()
-
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        if row == 0:
-            bpy.ops.object.vertex_group_set_active(group='finger_corner_TL')
+            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 3')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_2')
             bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_assign()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_remove_from()
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_remove_from()
-                  
-        for opp_side in ['finger_BOTTOM', 'finger_TOP', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-    
-
-    
-    for row in range(nrows-2):
-        bpy.ops.object.vertex_group_set_active(group='finger_row_gap_' + str(row))
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(lastcol) + ', ' + str(row))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(lastcol) + ', ' + str(row+1))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-
-    for row in range(nrows-1):
-        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
-        bpy.ops.object.vertex_group_select()
-
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_remove_from()
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_remove_from()
-                  
-        for opp_side in ['finger_BOTTOM', 'finger_TOP', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-         
-    for row in range(nrows-2):
-        bpy.ops.object.vertex_group_set_active(group='finger_row_gap_' + str(row))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(lastcol) + ', ' + str(row))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(lastcol) + ', ' + str(row+1))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-
-
-    #Raise edge - RIGHT
-    
-    
-    for row in range(nrows-1):
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(lastcol) + ', ' + str(row))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        if row == 0:
-            bpy.ops.object.vertex_group_set_active(group='finger_corner_TR')
-            bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_assign()
         bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_remove_from()
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_remove_from()
-        
-        for opp_side in ['finger_BOTTOM', 'finger_TOP', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_assign()
-
-
-    for row in range(nrows-2):
-        bpy.ops.object.vertex_group_set_active(group='finger_row_gap_' + str(row))
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row+1))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-
-    for row in range(nrows-1):
-        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(lastcol) + ', ' + str(row))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_remove_from()
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_remove_from()
+        bpy.ops.mesh.select_all(action='INVERT')
         
-        for opp_side in ['finger_BOTTOM', 'finger_TOP', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_assign()
 
-
-
-    for row in range(nrows-2):
-        bpy.ops.object.vertex_group_set_active(group='finger_row_gap_' + str(row))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row+1))
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-
-
-
-
-
-
-    #Raise edge - BOTTOM
-    
-    
-    for column in range(ncols):
-        if column in [2,3]:
-            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', ' + str(lastrow))
-        else:
-            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', ' + str(cornerrow))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
         
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_assign()
-        if column == 0:
-            bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-            bpy.ops.object.vertex_group_deselect()
-            bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-            bpy.ops.object.vertex_group_deselect()
-        
-        
-        if column == ncols-1:
-            bpy.ops.object.vertex_group_set_active(group='finger_corner_BR')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-            bpy.ops.object.vertex_group_deselect()
-            bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-            bpy.ops.object.vertex_group_deselect()
-            bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-            bpy.ops.object.vertex_group_assign()
-            
-
+        #Extrude Border
         if column <4:
             bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=(7 - (1-cos(alpha)/2)*column_offset(column)[1] - ( (1-sin(alpha)/2)*column_offset(column)[2])), angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
         else:
             bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_remove_from()
-
-        for opp_side in ['finger_LEFT', 'finger_RIGHT', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_all(action='DESELECT')
-        
-
-
-    for column in range(ncols-1):
-        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_' + str(column))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - '+ str(column) + ', 0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - '+ str(column+1) + ', 0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-
-
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BR')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    
-
-
-
-    for column in range(ncols):
-        if column in [2,3]:
-            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', ' + str(lastrow))
-        else:
-            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', ' + str(cornerrow))
-        bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_deselect()
-
-        if column == 0:
-            bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-            bpy.ops.object.vertex_group_deselect()
-            bpy.ops.object.vertex_group_set_active(group='switch - 1, ' + str(cornerrow))
-            bpy.ops.object.vertex_group_deselect()
-
-
-
-        if column == ncols-1:
-            bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.vertex_group_set_active(group='finger_corner_BR')
-            bpy.ops.object.vertex_group_select()
-            bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-            bpy.ops.object.vertex_group_deselect()
-            bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-            bpy.ops.object.vertex_group_deselect()
-            bpy.ops.object.vertex_group_set_active(group='switch - 3, '  + str(lastrow))
-            bpy.ops.object.vertex_group_deselect()
-            if lastcol != 4: 
-                bpy.ops.object.vertex_group_set_active(group='switch - 4, '  + str(cornerrow))
-                bpy.ops.object.vertex_group_deselect()
-
-        
         bpy.ops.object.vertex_group_set_active(group='RAISE_1')
         bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
 
+    for column in range(ncols-1):
+        #Fill in between extended parts
+        for vertex_group in ['finger_col_gap_' + str(column)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_TOP']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        if column in [2]:
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_3')
+            bpy.ops.object.vertex_group_deselect()
+        if column in [1, 3]:
+            bpy.ops.object.vertex_group_set_active(group='switch - 2, 3')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='switch - 3, 3')
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
+
+    ### Left
+    for row in range(nrows-1):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_0')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    for row in range(nrows-2):
+        #Fill in between extended parts
+        for vertex_group in ['finger_row_gap_' + str(row)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'finger_col_gap_0', 'finger_col_gap_1', 'finger_col_gap_2', 'finger_col_gap_3',  'finger_col_gap_4', 'finger_RIGHT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    
+    
+    ### RIGHT
+    for row in range(nrows-1):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch - 5, ' + str(row))
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_4')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    for row in range(nrows-2):
+        #Fill in between extended parts
+        for vertex_group in ['finger_row_gap_' + str(row)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'finger_col_gap_0', 'finger_col_gap_1', 'finger_col_gap_2', 'finger_col_gap_3',  'finger_col_gap_4', 'finger_LEFT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
+    
+    
+    
+    
+    #Clean Up vertex Groups
+    bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+    bpy.ops.object.vertex_group_select()
+    for vertex_group in ['RAISE_0']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    
+    bpy.ops.object.vertex_group_set_active(group="RAISE_0")
+    bpy.ops.object.vertex_group_select()
+    for vertex_group in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+
+
+    #Correct Corner Groups
+    for vertex_group in ['finger_corner_TL', 'finger_corner_BL', 'finger_corner_TR', 'finger_corner_BR']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.remove_doubles()
+    bpy.ops.mesh.select_all(action='DESELECT')
+
+
+        
+
+    bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=body_thickness*sqrt(2), angle=-2.35619, follow_face=True, caches_valid=False)
+    bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.separate(type="LOOSE")
+    
+        
+    
+    
+    
+    ### Top
+    for column in range(ncols):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')    
+        bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 0')
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+        #Extrude Border
+
+        if column <4:
+            bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7 + (1-sin(alpha)/2)*column_offset(column)[1] + (column_offset(column)[2]/2) , depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        else:
+            bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+
+        
+        bpy.ops.object.vertex_group_set_active(group='RAISE_2')
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+    for column in range(ncols-1):
+        #Fill in between extended edges
+        for vertex_group in ['finger_col_gap_' + str(column)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'RAISE_0', 'finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_row_gap_3', 'finger_BOTTOM', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    
+    
+    ### Bottom
+    for column in range(ncols):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        if column in [2, 3]:
+            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 4')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_3')
+            bpy.ops.object.vertex_group_select()
+        else:
+            bpy.ops.object.vertex_group_set_active(group='switch - ' + str(column) + ', 3')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_2')
+            bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+
+        
+        #Extrude Border
         if column <4:
             if column <2:
                 bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708+alpha, follow_face=True, caches_valid=False)
@@ -1478,129 +1353,309 @@ def main():
                 bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7 - (1-sin(alpha)/2)*column_offset(column)[1] + (column_offset(column)[2]/2) , depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
         else:
             bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
-            
-        bpy.ops.object.vertex_group_assign()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-        bpy.ops.object.vertex_group_remove_from()
+            if column == 4: bpy.ops.transform.resize(value=(0.5, 0.5, 0.5), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
+
         bpy.ops.object.vertex_group_set_active(group='RAISE_2')
         bpy.ops.object.vertex_group_assign()
-        
-        
-       
-        for opp_side in ['finger_LEFT', 'finger_RIGHT', 'key_finger']:
-            bpy.ops.object.vertex_group_set_active(group=opp_side)
-            bpy.ops.object.vertex_group_remove_from()
-            bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.mesh.select_all(action='DESELECT')
 
-
-
-
-       
     for column in range(ncols-1):
-        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_' + str(column))
+        #Fill in between extended parts
+        for vertex_group in ['finger_col_gap_' + str(column)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'RAISE_0', 'finger_row_gap_0', 'finger_row_gap_1', 'finger_row_gap_2', 'finger_TOP']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        if column in [2]:
+            bpy.ops.object.vertex_group_set_active(group='finger_row_gap_3')
+            bpy.ops.object.vertex_group_deselect()
+        if column in [1, 3]:
+            bpy.ops.object.vertex_group_set_active(group='switch - 2, 3')
+            bpy.ops.object.vertex_group_deselect()
+            bpy.ops.object.vertex_group_set_active(group='switch - 3, 3')
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    
+        ### Left
+    for row in range(nrows-1):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch - 0, ' + str(row))
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_0')
         bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='key_finger')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - '+ str(column) + ', 0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='switch - '+ str(column+1) + ', 0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.mesh.remove_doubles()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-
-    bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-    bpy.ops.object.vertex_group_select()
-    
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_all(action='DESELECT')
-
-    
-    #Raise edge - CORNERS
-    for corner in ['finger_corner_TL',
-                  'finger_corner_TR',
-                  'finger_corner_BL',
-                  'finger_corner_BR']:
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.vertex_group_set_active(group=corner)
         bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
-             
-        bpy.ops.object.vertex_group_set_active(group=corner)
         bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='finger_TOP')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_LEFT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-        bpy.ops.object.vertex_group_deselect()
-        bpy.ops.mesh.edge_face_add()
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='RAISE_2')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
 
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.object.vertex_group_set_active(group='RAISE_2')
+        bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
+    
+    for row in range(nrows-2):
+        #Fill in between extended parts
+        for vertex_group in ['finger_row_gap_' + str(row)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'RAISE_0', 'finger_col_gap_0', 'finger_col_gap_1', 'finger_col_gap_2', 'finger_col_gap_3',  'finger_col_gap_4', 'finger_RIGHT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
+    
+    
+    ### RIGHT
+    for row in range(nrows-1):
+        #Isolate edge
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.object.vertex_group_set_active(group='switch - 5, ' + str(row))
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group='finger_col_gap_4')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='key_finger')
+        bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='RAISE_0')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_set_active(group='finger_TOP')
         bpy.ops.object.vertex_group_select()
-        bpy.ops.object.vertex_group_set_active(group=corner)
-        bpy.ops.object.vertex_group_remove_from()
+        bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group='RAISE_2')
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_all(action='INVERT')
+        
+
+        
+        #Extrude Border
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.object.vertex_group_set_active(group='RAISE_2')
+        bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
     
-
-    bpy.ops.object.vertex_group_set_active(group='key_finger')
+    for row in range(nrows-2):
+        #Fill in between extended parts
+        for vertex_group in ['finger_row_gap_' + str(row)]:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_select()
+        for vertex_group in ['key_finger', 'RAISE_0', 'finger_col_gap_0', 'finger_col_gap_1', 'finger_col_gap_2', 'finger_col_gap_3',  'finger_col_gap_4', 'finger_LEFT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    
+    
+    #Clean Up vertex Groups
+    bpy.ops.object.vertex_group_set_active(group="RAISE_2")
     bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='RAISE_0')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT_RING_0')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT_RING_0')
-    bpy.ops.object.vertex_group_remove_from()
+    for vertex_group in ['RAISE_1']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_remove_from()
     bpy.ops.mesh.select_all(action='DESELECT')
     
+    bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+    bpy.ops.object.vertex_group_select()
+    for vertex_group in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
 
-    
-    for side in ['finger_TOP',
-                  'finger_LEFT',
-                  'finger_RIGHT',
-                  'finger_BOTTOM']:
-        bpy.ops.object.vertex_group_set_active(group=side)
+
+    #Correct Corner Groups
+    for vertex_group in ['finger_corner_TL', 'finger_corner_BL', 'finger_corner_TR', 'finger_corner_BR']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
         bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_more(use_face_step=False)
+        for vertex_group in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'BRIDGE_LEFT']:
+            bpy.ops.object.vertex_group_set_active(group=vertex_group)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+
+        
+
+    bpy.ops.object.vertex_group_set_active(group="RAISE_2")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-2, angle=1.5708, follow_face=True, edge_rail=False, caches_valid=False)
     bpy.ops.object.vertex_group_set_active(group='RAISE_2')
     bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.separate(type="LOOSE")
+    
+    
+    ###
+    #  Add corner Verteces to respective sides
+    ###
+    for side in ["finger_TOP", "finger_LEFT", "finger_RIGHT"]:
+        bpy.ops.object.vertex_group_set_active(group=side)
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.select_more()
+        bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group=side)
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.select_all(action='DESELECT')
+    
+    bpy.ops.object.vertex_group_set_active(group="finger_BOTTOM")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_corner_BR")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_RIGHT")
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group="finger_BOTTOM")
+    bpy.ops.object.vertex_group_assign()
     bpy.ops.mesh.select_all(action='DESELECT')
+    
 
+    
 
+    
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    ###
+    #  Build bottom finger plate
+    ###
+    
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_bottom']
+    bpy.data.objects["finger_plate_bottom"].select_set(True)
+    
+    # clean up close verticies
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.remove_doubles(threshold=0.5)
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.data.objects["finger_plate_top.001"].select_set(True)
+    bpy.ops.object.join()
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.mesh.bridge_edge_loops()
+    bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
     
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.data.objects["finger_plate_top.002"].select_set(True)
+    bpy.data.objects["finger_plate_top.003"].select_set(True)
+    bpy.ops.object.delete(use_global=False)
 
+    
+    #Clean up vertex groups
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.object.vertex_group_set_active(group="key_finger")
+    bpy.ops.object.vertex_group_select()
+    for vertex_group in ['finger_TOP', 'finger_LEFT', 'finger_RIGHT', 'finger_BOTTOM', 'finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'BRIDGE_LEFT', 'BRIDGE_MID', 'BRIDGE_RIGHT', 'BRIDGE_LEFT_RING_0', 'BRIDGE_RIGHT_RING_0']:
+        bpy.ops.object.vertex_group_set_active(group=vertex_group)
+        bpy.ops.object.vertex_group_remove_from()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    
+    
+    
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    if seperate_plate_from_body: 
+        bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top']
+        bpy.data.objects["finger_plate_top"].select_set(True)
+        bpy.ops.object.join()
+
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_non_manifold()
+        bpy.ops.mesh.bridge_edge_loops()
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.mesh.print3d_clean_non_manifold()
+
+    
+
+    
+    ####################
+    ## Seperate Plates From body ##
+    ####################
+    
+    if seperate_plate_from_body:
+        
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top']
+        bpy.data.objects["finger_plate_top"].select_set(True)
+        
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_non_manifold()
+        bpy.ops.mesh.offset_edges(geometry_mode='offset', width=0.5, follow_face=True, caches_valid=False)
+        bpy.ops.mesh.separate(type="LOOSE")
+        
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.context.selected_objects[0].name = "seperated_finger_plate_top"
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top.001']
+        bpy.data.objects["finger_plate_top.001"].select_set(True)
+        bpy.context.selected_objects[0].name = "finger_plate_top"
+        
+        
+        
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_bottom']
+        bpy.data.objects["finger_plate_bottom"].select_set(True)
+        
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_non_manifold()
+
+        bpy.ops.mesh.offset_edges(geometry_mode='offset', width=0.5, follow_face=True, caches_valid=False)
+        bpy.ops.mesh.separate(type="LOOSE")
+        
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.context.selected_objects[0].name = "seperated_finger_plate_bottom"
+
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_bottom.001']
+        bpy.data.objects["finger_plate_bottom.001"].select_set(True)
+        bpy.context.selected_objects[0].name = "finger_plate_bottom"
+        
+        
+        
+        
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.data.objects['seperated_finger_plate_top']
+        bpy.data.objects["seperated_finger_plate_top"].select_set(True)
+        
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.mesh.select_non_manifold()
+        
+        bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-5, depth=-2, depth_mode='depth', follow_face=True, caches_valid=False)
+
+
+   
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-body_thickness, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+
+
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-0.05, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.mesh.remove_doubles(threshold=1)
 
 
 
@@ -1644,35 +1699,7 @@ def main():
         bpy.ops.mesh.quads_convert_to_tris(ngon_method='BEAUTY')
         bpy.ops.mesh.select_all(action='DESELECT')
 
-    '''
-    for side in [['finger_TOP'],
-                 ['finger_LEFT'],
-                 ['finger_RIGHT'],
-                 ['finger_BOTTOM']]:
-        bpy.ops.object.vertex_group_set_active(group=side[0])
-        bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-5, angle=0, follow_face=True, caches_valid=False, angle_presets='0°')
-    bpy.ops.transform.edge_crease(value=1, snap=False)
 
-    bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-5, angle=0, follow_face=True, caches_valid=False, angle_presets='0°')
-    bpy.ops.transform.edge_crease(value=-1, snap=False)
-
-    bpy.ops.mesh.select_all(action='DESELECT')
-
-    
-    bpy.ops.mesh.select_non_manifold()
-    bpy.ops.mesh.select_all(action='INVERT')
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-
-    bpy.ops.object.vertex_group_set_active(group='finger_RIGHT')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='finger_BOTTOM')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    '''
     bpy.ops.mesh.select_non_manifold()
     for side in [['finger_TOP'],
              ['finger_LEFT'],
@@ -1680,7 +1707,10 @@ def main():
              ['BRIDGE_LEFT_RING_0'],
              ['finger_BOTTOM'],
              ['BRIDGE_RIGHT'],
-             ['BRIDGE_MID']]:
+             ['BRIDGE_MID'],
+             ['finger_corner_TL'],
+             ['finger_corner_TR'],
+             ['finger_corner_BR']]:
         bpy.ops.object.vertex_group_set_active(group=side[0])
         bpy.ops.object.vertex_group_deselect()
     bpy.ops.object.vertex_group_set_active(group='thumb_corner_TLL')
@@ -1691,33 +1721,22 @@ def main():
     with suppress_stdout(): bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=5, angle=0, follow_face=True, caches_valid=False)
     bpy.ops.mesh.select_all(action='DESELECT')
 
-    #print(xyz)
+
 
     # Build left Corner Junction
+    bpy.ops.object.vertex_group_set_active(group="BRIDGE_LEFT_RING_0")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group="finger_LEFT")
+    bpy.ops.object.vertex_group_deselect()
     for corner in [['finger_corner_BL'],
                   ['thumb_corner_TL'],
                   ['thumb_corner_TLL']]:
         bpy.ops.object.vertex_group_set_active(group=corner[0])
         bpy.ops.object.vertex_group_select()
-    
     bpy.ops.mesh.edge_face_add()
     bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
     bpy.ops.mesh.select_all(action='DESELECT')
-    '''
-    bpy.ops.mesh.select_non_manifold()
-    bpy.ops.object.vertex_group_set_active(group='key_thumb')
-    bpy.ops.object.vertex_group_remove_from()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    
-    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='thumb_corner_TLL')
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.object.vertex_group_set_active(group='key_thumb')
-    bpy.ops.object.vertex_group_deselect()
-    bpy.ops.mesh.edge_face_add()
-    bpy.ops.mesh.select_all(action='DESELECT')
-    '''
+
     
     bpy.ops.mesh.select_non_manifold()
     bpy.ops.mesh.select_all(action='INVERT')
@@ -1773,7 +1792,7 @@ def main():
 
     bpy.ops.object.mode_set(mode = 'EDIT')
     
-    
+
     # Bridge connection between plates
     for bridge in ['BRIDGE_MID', 'BRIDGE_LEFT', 'BRIDGE_RIGHT']:
         bpy.ops.object.vertex_group_set_active(group=bridge)
@@ -1947,13 +1966,27 @@ def main():
     bpy.ops.transform.edge_crease(value=1, snap=False)
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
+    
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects['body_bottom']
+    bpy.data.objects["body_bottom"].select_set(True)
+    
+    
 
 
 
     ################
     ## CASE WALLS ##
     ################
+    
+    
+    '''
+    
+    re think...
+    
+    need to add corners to respective edges
+    
+    '''
 
     print("{:.2f}".format(time.time()-start_time), "- Generate Body Walls")
 
@@ -1997,13 +2030,14 @@ def main():
         for ring_num in range(0, 3):
             bpy.ops.object.vertex_group_set_active(group=build_edge[0])
             bpy.ops.object.vertex_group_select()
+
             if build_edge[0]=="finger_LEFT":
                 bpy.ops.object.vertex_group_set_active(group="thumb_corner_TL")
                 bpy.ops.object.vertex_group_deselect()
                 bpy.ops.object.vertex_group_set_active(group="switch - 0, " + str(cornerrow))
                 bpy.ops.object.vertex_group_deselect()
-        
                 bpy.ops.object.vertex_group_set_active(group=build_edge[0])
+            
             with suppress_stdout():
                 bpy.ops.mesh.offset_edges( width=build_edge[1][ring_num][0], depth=build_edge[1][ring_num][1], depth_mode='depth', follow_face=True, mirror_modifier=False, edge_rail=False, caches_valid=False)
             bpy.ops.object.vertex_group_set_active(group='RING_' + str(ring_num+1))
@@ -2018,6 +2052,7 @@ def main():
         bpy.ops.object.vertex_group_set_active(group=group)
         bpy.ops.object.vertex_group_select()
     bpy.ops.mesh.select_all(action='DESELECT')
+
 
 
     # Connect Rings
@@ -2041,7 +2076,7 @@ def main():
             bpy.ops.mesh.subdivide(number_cuts=1, smoothness=0, ngon=True, quadcorner='INNERVERT')
     bpy.ops.mesh.select_all(action='DESELECT')
 
-
+    #print(xyz)
     
     '''
     # Correct Thumb Gap
@@ -2108,7 +2143,7 @@ def main():
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 
 
-
+    
 
 
     #######################
@@ -2516,8 +2551,10 @@ def main():
                 
                 bpy.ops.object.modifier_add(type='BOOLEAN')
                 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
-                bpy.context.object.modifiers["Boolean"].solver = 'FAST'
-                bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
+                bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+                bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+                #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+                #bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
                 bpy.ops.object.modifier_apply(modifier="Boolean")
             
                 bpy.ops.object.mode_set(mode = 'EDIT')
@@ -2608,7 +2645,6 @@ def main():
 
 
 
-
     ###########################
     ##  Loligagger Formation ##
     ###########################
@@ -2657,7 +2693,9 @@ def main():
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             bpy.ops.object.modifier_add(type='BOOLEAN')
             bpy.context.object.modifiers["Boolean"].operation = 'INTERSECT'
-            bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+            #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["body"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -2671,7 +2709,9 @@ def main():
             bpy.data.objects["body"].select_set(True)
             bpy.ops.object.modifier_add(type='BOOLEAN')
             bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
-            bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+            #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
             bpy.ops.object.mode_set(mode = 'EDIT')
@@ -2720,7 +2760,9 @@ def main():
             bpy.data.objects["body_bottom"].select_set(True)
             bpy.ops.object.modifier_add(type='BOOLEAN')
             bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
-            bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+            #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
             bpy.ops.object.mode_set(mode = 'EDIT')
@@ -2790,7 +2832,9 @@ def main():
 
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
-    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+    #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
 
@@ -2884,7 +2928,9 @@ def main():
         bpy.data.objects["holder_outside_fairing"].select_set(True)
         bpy.context.view_layer.objects.active = bpy.data.objects['holder_outside_fairing']
         bpy.ops.object.modifier_add(type='BOOLEAN')
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -3296,7 +3342,9 @@ def main():
         bpy.data.objects["body"].select_set(True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_hole_2_width/2 + holder_hole_2_offset, -8.5, 0)), scale=(holder_hole_2_width, 10, 2*holder_hole_height + 1))
@@ -3320,7 +3368,9 @@ def main():
         bpy.data.objects["body"].select_set(True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         #bottom extension
@@ -3685,9 +3735,27 @@ def main():
 
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
-    bpy.context.object.modifiers["Boolean"].solver = 'FAST'
-    bpy.context.object.modifiers["Boolean"].double_threshold = 0.000001
+    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+    #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    #bpy.context.object.modifiers["Boolean"].double_threshold = 0.000001
     bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE"]
+    bpy.ops.object.modifier_apply(modifier="Boolean")
+
+    bpy.ops.mesh.print3d_clean_non_manifold()
+    
+    print("{:.2f}".format(time.time()-start_time), "- Add Switch Hole Lower Cuts")
+
+    bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+    bpy.data.objects['body'].select_set(True)
+
+    bpy.ops.object.modifier_add(type='BOOLEAN')
+    bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+    #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+    #bpy.context.object.modifiers["Boolean"].double_threshold = 0.000001
+    bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE_LOWER"]
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
     bpy.ops.mesh.print3d_clean_non_manifold()
@@ -3772,7 +3840,7 @@ def main():
 
     bpy.ops.object.select_all(action='DESELECT')
 
-    for collection in ['AXIS', 'SWITCH_SUPPORT', 'SWITCH_HOLE', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'AMEOBA_CUT']:
+    for collection in ['AXIS', 'SWITCH_SUPPORT', 'SWITCH_HOLE', 'SWITCH_HOLE_LOWER', 'SWITCH_PROJECTION', 'SWITCH_PROJECTION_INNER', 'KEYCAP_PROJECTION_OUTER', 'KEYCAP_PROJECTION_INNER', 'AMEOBA_CUT']:
         for thing in bpy.data.collections[collection].objects:
             bpy.context.view_layer.objects.active = thing
             thing.select_set(True)
