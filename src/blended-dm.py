@@ -117,7 +117,7 @@ def main():
 
 
     body_thickness = 2
-    body_subsurf_level = 3
+    body_subsurf_level = 0
     relaxed_mesh = True
     switch_support = True
     loligagger_port = True
@@ -1054,7 +1054,7 @@ def main():
     bpy.ops.mesh.select_all(action='DESELECT')
 
 
-
+    # create bottom plate outline
     bpy.ops.object.vertex_group_set_active(group="RAISE_0")
     bpy.ops.object.vertex_group_select()
     bpy.ops.mesh.offset_edges(geometry_mode='offset', width=body_thickness*sqrt(2), angle=-0.785398, follow_face=True, caches_valid=False)
@@ -1062,12 +1062,15 @@ def main():
     bpy.ops.object.vertex_group_assign()
     bpy.ops.mesh.separate(type="LOOSE")
     
+   
     
+
     #########################################
     ##  Lift Edges   ######
     #########################################
-    
-    
+
+
+
     ### Top
     for column in range(ncols):
         #Isolate edge
@@ -1106,7 +1109,7 @@ def main():
         bpy.ops.mesh.select_all(action='DESELECT')
         
         
-        
+
     ### Bottom
     for column in range(ncols):
         #Isolate edge
@@ -1236,9 +1239,7 @@ def main():
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.select_all(action='DESELECT')
         
-    
-    
-    
+
     
     #Clean Up vertex Groups
     bpy.ops.object.vertex_group_set_active(group="RAISE_1")
@@ -1264,16 +1265,25 @@ def main():
     bpy.ops.mesh.select_all(action='DESELECT')
 
 
+
+    if seperate_plate_from_body:
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-body_thickness, angle=0, follow_face=True, caches_valid=False)
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.separate(type="LOOSE")
+    else:
+        bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.offset_edges(geometry_mode='offset', width=body_thickness*sqrt(2), angle=-2.35619, follow_face=True, caches_valid=False)
+        bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+        bpy.ops.object.vertex_group_assign()
+        bpy.ops.mesh.separate(type="LOOSE")
         
 
-    bpy.ops.object.vertex_group_set_active(group="RAISE_1")
-    bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=body_thickness*sqrt(2), angle=-2.35619, follow_face=True, caches_valid=False)
-    bpy.ops.object.vertex_group_set_active(group='RAISE_1')
-    bpy.ops.object.vertex_group_assign()
-    bpy.ops.mesh.separate(type="LOOSE")
-    
-        
+
     
     
     
@@ -1419,7 +1429,7 @@ def main():
         bpy.ops.mesh.select_all(action='DESELECT')
         
     
-    
+
     ### RIGHT
     for row in range(nrows-1):
         #Isolate edge
@@ -1493,10 +1503,12 @@ def main():
 
     bpy.ops.object.vertex_group_set_active(group="RAISE_2")
     bpy.ops.object.vertex_group_select()
-    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-2, angle=1.5708, follow_face=True, edge_rail=False, caches_valid=False)
+    bpy.ops.mesh.offset_edges(geometry_mode='offset', width=-2*sqrt(2), angle=0.7853982, follow_face=True, edge_rail=False, caches_valid=False)
     bpy.ops.object.vertex_group_set_active(group='RAISE_2')
     bpy.ops.object.vertex_group_assign()
     bpy.ops.mesh.separate(type="LOOSE")
+    
+
     
     
     ###
@@ -1523,7 +1535,7 @@ def main():
     bpy.ops.mesh.select_all(action='DESELECT')
     
 
-    
+
 
     
     bpy.ops.object.mode_set(mode = 'OBJECT')
@@ -1531,7 +1543,7 @@ def main():
     ###
     #  Build bottom finger plate
     ###
-    
+
 
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_bottom']
@@ -1553,11 +1565,24 @@ def main():
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
-    
-    bpy.ops.object.select_all(action='DESELECT')
     bpy.data.objects["finger_plate_top.002"].select_set(True)
+    bpy.ops.object.join()
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.mesh.bridge_edge_loops()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
     bpy.data.objects["finger_plate_top.003"].select_set(True)
-    bpy.ops.object.delete(use_global=False)
+    bpy.ops.object.join()
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.mesh.bridge_edge_loops()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
 
     
     #Clean up vertex groups
@@ -1573,17 +1598,8 @@ def main():
     
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
-    if seperate_plate_from_body: 
-        bpy.context.view_layer.objects.active = bpy.data.objects['finger_plate_top']
-        bpy.data.objects["finger_plate_top"].select_set(True)
-        bpy.ops.object.join()
-
-        bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.mesh.select_non_manifold()
-        bpy.ops.mesh.bridge_edge_loops()
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.object.mode_set(mode = 'OBJECT')
-        bpy.ops.mesh.print3d_clean_non_manifold()
+    
+    
 
     
 
@@ -1591,7 +1607,7 @@ def main():
     ####################
     ## Seperate Plates From body ##
     ####################
-    
+    '''
     if seperate_plate_from_body:
         
         bpy.ops.object.select_all(action='DESELECT')
@@ -1656,6 +1672,9 @@ def main():
 
         bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-0.05, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
         bpy.ops.mesh.remove_doubles(threshold=1)
+
+
+    '''
 
 
 
@@ -1760,6 +1779,16 @@ def main():
     bpy.ops.object.mode_set(mode = 'OBJECT')
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
+    if seperate_plate_from_body:
+        bpy.ops.object.mode_set(mode = 'EDIT')
+        bpy.ops.object.vertex_group_set_active(group="RAISE_0")
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+        bpy.ops.object.vertex_group_select()
+        bpy.ops.mesh.delete(type='FACE')
+        bpy.ops.object.mode_set(mode = 'OBJECT')
+         
+
 
 
     
@@ -1793,13 +1822,77 @@ def main():
     bpy.ops.object.mode_set(mode = 'EDIT')
     
 
+
     # Bridge connection between plates
-    for bridge in ['BRIDGE_MID', 'BRIDGE_LEFT', 'BRIDGE_RIGHT']:
+
+    for bridge in ['BRIDGE_LEFT']:
         bpy.ops.object.vertex_group_set_active(group=bridge)
         bpy.ops.object.vertex_group_select()
+
+        for ring in ['RAISE_1', 'RAISE_2']:
+            bpy.ops.object.vertex_group_set_active(group=ring)
+            bpy.ops.object.vertex_group_deselect()
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.quads_convert_to_tris(ngon_method='BEAUTY')
         bpy.ops.mesh.select_all(action='DESELECT')
+        
+    
+    for bridge in ['BRIDGE_MID']:
+        bpy.ops.object.vertex_group_set_active(group=bridge)
+        bpy.ops.object.vertex_group_select()
+
+        for ring in ['RAISE_0', 'RAISE_2']:
+            bpy.ops.object.vertex_group_set_active(group=ring)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.quads_convert_to_tris(ngon_method='BEAUTY')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
+    for bridge in ['BRIDGE_RIGHT']:
+        bpy.ops.object.vertex_group_set_active(group=bridge)
+        bpy.ops.object.vertex_group_select()
+
+        for ring in ['RAISE_0', 'RAISE_1']:
+            bpy.ops.object.vertex_group_set_active(group=ring)
+            bpy.ops.object.vertex_group_deselect()
+        bpy.ops.mesh.edge_face_add()
+        bpy.ops.mesh.quads_convert_to_tris(ngon_method='BEAUTY')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        
+    for bridge in ['BRIDGE_LEFT', 'BRIDGE_MID']:
+        bpy.ops.object.vertex_group_set_active(group=bridge)
+        bpy.ops.object.vertex_group_select()
+        
+    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group='key_thumb')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group='RAISE_1')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group='BRIDGE_RIGHT')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.mesh.delete(type='VERT')
+
+    
+    bpy.ops.object.vertex_group_set_active(group='BRIDGE_LEFT')
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group='finger_corner_BL')
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_set_active(group='key_thumb')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group='RAISE_0')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.object.vertex_group_set_active(group='BRIDGE_MID')
+    bpy.ops.object.vertex_group_deselect()
+    bpy.ops.mesh.delete(type='VERT')
+    
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.fill_holes()
+    bpy.ops.mesh.normals_make_consistent(inside=True)
+    bpy.ops.mesh.select_all(action='DESELECT')
+
 
     bpy.ops.transform.edge_crease(value=0.5)
     bpy.ops.mesh.select_all(action='DESELECT')
@@ -1972,7 +2065,7 @@ def main():
     bpy.data.objects["body_bottom"].select_set(True)
     
     
-
+    
 
 
     ################
@@ -2076,7 +2169,7 @@ def main():
             bpy.ops.mesh.subdivide(number_cuts=1, smoothness=0, ngon=True, quadcorner='INNERVERT')
     bpy.ops.mesh.select_all(action='DESELECT')
 
-    #print(xyz)
+
     
     '''
     # Correct Thumb Gap
@@ -2143,7 +2236,7 @@ def main():
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
 
 
-    
+
 
 
     #######################
@@ -2166,7 +2259,7 @@ def main():
     bpy.data.objects["body_bottom"].select_set(True)
     bpy.ops.object.join()
     
-
+    
 
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
@@ -2174,9 +2267,21 @@ def main():
 
     bpy.ops.object.vertex_group_set_active(group="RING_3")
     bpy.ops.object.vertex_group_deselect()
+    
+
     bpy.ops.mesh.bridge_edge_loops()
+
+
+    
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.ops.object.modifier_add(type='SHRINKWRAP')
+    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+    bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+    bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_1"
+    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
     bpy.ops.object.modifier_add(type='SHRINKWRAP')
     bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
