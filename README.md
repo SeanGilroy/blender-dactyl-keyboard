@@ -16,7 +16,7 @@ This script is very much a work-in-progress. It is easy to select a set of param
 ## Generating a Design
 
 **Install Blender**
-* Install the latest version of Blender  [(Currently tested on version 4.3.0)](https://www.blender.org/download/)
+* Install the latest version of Blender  [(Currently tested on version 4.5.1)](https://www.blender.org/download/)
 
 **Load Script**
 * Open Blender and delete the initial collections and objects (i.e., Collection, Camera, Cube, & Light)
