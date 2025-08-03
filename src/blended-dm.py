@@ -519,6 +519,7 @@ def main():
     ##################
 
     print("{:.2f}".format(time.time()-start_time), "- Generate Finger Plate")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
 
     for finger_plate in ["top", "bottom"]:
@@ -698,6 +699,7 @@ def main():
     #################
 
     print("{:.2f}".format(time.time()-start_time), "- Generate Thumb Plate")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     for thumb_plate in ["top", "bottom"]:
 
@@ -842,7 +844,7 @@ def main():
     #########################################
 
     print("{:.2f}".format(time.time()-start_time), "- Develop Plate-Body Interface")
-    
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
     
     # Add buffer around plate boarder for keycap tolerance
     
@@ -1078,7 +1080,7 @@ def main():
     ##  Lift Edges   ######
     #########################################
 
-
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     ### Top
     for column in range(ncols):
@@ -1555,6 +1557,8 @@ def main():
     ###
     #  Build bottom finger plate
     ###
+    
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
 
     bpy.ops.object.select_all(action='DESELECT')
@@ -1752,6 +1756,7 @@ def main():
     ####################
 
     print("{:.2f}".format(time.time()-start_time), "- Connect Finger and Thumb Top Plates")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     # Join finger_plate and thumb_plate meshes
     bpy.ops.object.select_all(action='DESELECT')
@@ -1865,6 +1870,7 @@ def main():
     ###########################
 
     print("{:.2f}".format(time.time()-start_time), "- Connect Finger and Thumb Bottom Plates")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     # Join finger_plate and thumb_plate meshes
     bpy.ops.object.select_all(action='DESELECT')
@@ -2229,6 +2235,7 @@ def main():
     ## CASE WALLS ##
     ################
     
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
     
     '''
     
@@ -2404,7 +2411,9 @@ def main():
     
     
     
+    
     print("{:.2f}".format(time.time()-start_time), "- Generate Bottom Body Walls")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
 
     bpy.ops.object.select_all(action='DESELECT')
@@ -2637,6 +2646,7 @@ def main():
     ###########################
 
     print("{:.2f}".format(time.time()-start_time), "- Punch out Switch Locations " + str(body_subsurf_level) + "x")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
@@ -3289,6 +3299,9 @@ def main():
     ####################################
 
     print("{:.2f}".format(time.time()-start_time), "- Join Inner and Outer Body Mesh")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+    
+    
 
     bpy.ops.mesh.primitive_cube_add(size=400, enter_editmode=False, align='WORLD', location=(0, 0, -200 - bottom_thickness), scale=(1, 1, 1))
     bpy.context.selected_objects[0].name = "cut_cube"
@@ -3495,6 +3508,7 @@ def main():
     ###########################
 
     print("{:.2f}".format(time.time()-start_time), "- Generate Bottom Plate")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
 
     bpy.ops.object.select_all(action='DESELECT')
@@ -3916,6 +3930,8 @@ def main():
     if magnet_bottom:
 
         print("{:.2f}".format(time.time()-start_time), "- Adding Magnet Connectors")
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        
 
         bpy.ops.object.select_all(action='DESELECT')
 
@@ -4135,6 +4151,7 @@ def main():
     ######################
 
     print("{:.2f}".format(time.time()-start_time), "- Adding Bottom Stopper")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     #              [location,                                       direction,                                      rotation] 
     magnet_data = [['axis - ' + str(ncols-1) + ', 0',               'axis - ' + str(ncols-1) + ', ' + str(nrows-2 - (nrows-1)%2 ), [0, radians(-90), 0]]]
@@ -4212,6 +4229,7 @@ def main():
     #########################
 
     print("{:.2f}".format(time.time()-start_time), "- Add Switch Holes")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     bpy.ops.object.select_all(action='DESELECT')
     if seperate_plate_from_body:
@@ -4269,6 +4287,7 @@ def main():
 
     if amoeba_style != 'none':
         print("{:.2f}".format(time.time()-start_time), "- Add Ameoba Cuts")
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
         bpy.ops.object.select_all(action='DESELECT')
         if seperate_plate_from_body:
@@ -4311,6 +4330,7 @@ def main():
 
     if switch_support:
         print("{:.2f}".format(time.time()-start_time), "- Add Switch Supports")
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
         
         for support in bpy.data.collections["SWITCH_SUPPORT"].objects:
             if "thumb" not in support.name and seperate_plate_from_body:
@@ -4333,6 +4353,7 @@ def main():
     ##############
 
     print("{:.2f}".format(time.time()-start_time), "- Clean Up")
+    bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
