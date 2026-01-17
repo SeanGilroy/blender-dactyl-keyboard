@@ -296,13 +296,13 @@ def main():
                 
                 # Apply transfomations to each set tools
                 if (column_style == "standard"):
-                    bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
-                    bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, column_radius))
+                    bpy.ops.transform.rotate(value=(alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
+                    bpy.ops.transform.rotate(value=(column_angle), orient_axis='Y', center_override=(0.0, 0.0, column_radius))
                     bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
                     
                 elif (column_style == "orthographic"):
-                    bpy.ops.transform.rotate(value=(-alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
-                    bpy.ops.transform.rotate(value=(-column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                    bpy.ops.transform.rotate(value=(alpha * (centerrow - row)), orient_axis='X', center_override=(0.0, 0.0, row_radius))
+                    bpy.ops.transform.rotate(value=(column_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
                     if column==ncols-1 and wide_pinky:
                         bpy.ops.transform.translate(value=( (column - centercol + 0.25)*(1 + column_radius * sin(beta)), 0, column_radius * (1 - cos(column_angle))), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
                     else:
@@ -318,7 +318,7 @@ def main():
                     bpy.ops.transform.translate(value=column_offset(column), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True),  mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
                     
-                bpy.ops.transform.rotate(value=(-tenting_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=(tenting_angle), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
                 bpy.ops.transform.translate(value=(0, 0, keyboard_z_offset), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
 
@@ -371,9 +371,9 @@ def main():
             bpy.data.objects[tool.lower() + tool_identifier].select_set(True)
 
         # Apply rotation    
-        bpy.ops.transform.rotate(value=-radians(th_layout[key][0][0]), orient_axis='X', center_override=(0.0, 0.0, 0.0))
-        bpy.ops.transform.rotate(value=-radians(th_layout[key][0][1]), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-        bpy.ops.transform.rotate(value=-radians(th_layout[key][0][2]), orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+        bpy.ops.transform.rotate(value=radians(th_layout[key][0][0]), orient_axis='X', center_override=(0.0, 0.0, 0.0))
+        bpy.ops.transform.rotate(value=radians(th_layout[key][0][1]), orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+        bpy.ops.transform.rotate(value=radians(th_layout[key][0][2]), orient_axis='Z', center_override=(0.0, 0.0, 0.0))
 
         # Move keys into position
         bpy.ops.transform.translate(value=bpy.data.objects['thumb_orgin'].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
@@ -558,9 +558,9 @@ def main():
                         bpy.ops.transform.translate(value=-grid_mesh.faces[face_is_a_key[-1]].calc_center_median(), orient_type='GLOBAL')
                         bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
 
-                        bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
-                        bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                        bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+                        bpy.ops.transform.rotate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+                        bpy.ops.transform.rotate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                        bpy.ops.transform.rotate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
                         bpy.ops.transform.translate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].location, orient_type='GLOBAL')
                     
                     elif finger_plate == "bottom":
@@ -569,9 +569,9 @@ def main():
                         bpy.ops.transform.translate(value=-grid_mesh.faces[face_is_a_key[-1]].calc_center_median(), orient_type='GLOBAL')
                         bpy.ops.transform.translate(value=(0, 0, key_well_offset+amoeba_position[2]), orient_type='GLOBAL')
 
-                        bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
-                        bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                        bpy.ops.transform.rotate(value=-bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+                        bpy.ops.transform.rotate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+                        bpy.ops.transform.rotate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                        bpy.ops.transform.rotate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
                         bpy.ops.transform.translate(value=bpy.data.objects['axis - '+ str(column) + ', ' + str(row)].location, orient_type='GLOBAL')
                         bpy.ops.transform.translate(value=(0,0,-key_well_offset), orient_type='GLOBAL') 
                     
@@ -735,9 +735,9 @@ def main():
                 bpy.ops.transform.translate(value=-grid_mesh.faces[faces_to_use[thumb]].calc_center_median(), orient_type='GLOBAL')
                 bpy.ops.transform.translate(value=(0, 0, mount_thickness+key_well_offset), orient_type='GLOBAL')
 
-                bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
-                bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
                 bpy.ops.transform.translate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
                 
@@ -750,9 +750,9 @@ def main():
                 bpy.ops.transform.translate(value=(0, 0, key_well_offset+amoeba_position[2]), orient_type='GLOBAL')
                 
 
-                bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
-                bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
-                bpy.ops.transform.rotate(value=-bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[0], orient_axis='X', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[1], orient_axis='Y', center_override=(0.0, 0.0, 0.0))
+                bpy.ops.transform.rotate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].rotation_euler[2], orient_axis='Z', center_override=(0.0, 0.0, 0.0))
                 bpy.ops.transform.translate(value=bpy.data.objects['axis - thumb - ' + str(thumb)].location, orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
                 bpy.ops.transform.translate(value=(0,0,-key_well_offset), orient_type='GLOBAL')
@@ -1551,7 +1551,7 @@ def main():
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
     
-    
+    #print(XYZ)
     
     
     ###
@@ -2784,7 +2784,7 @@ def main():
 
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.ops.object.mode_set(mode = 'EDIT')
@@ -2800,7 +2800,7 @@ def main():
 
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.ops.object.mode_set(mode = 'EDIT')
@@ -3015,7 +3015,7 @@ def main():
                 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
                 bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
                 bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-                #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+                #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
                 #bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
                 bpy.ops.object.modifier_apply(modifier="Boolean")
             
@@ -3157,7 +3157,7 @@ def main():
             bpy.context.object.modifiers["Boolean"].operation = 'INTERSECT'
             bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
             bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-            #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["body"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -3173,7 +3173,7 @@ def main():
             bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
             bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
             bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-            #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
             bpy.ops.object.mode_set(mode = 'EDIT')
@@ -3224,7 +3224,7 @@ def main():
             bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
             bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
             bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-            #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+            #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
             bpy.ops.object.mode_set(mode = 'EDIT')
@@ -3426,7 +3426,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
         bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -3885,7 +3885,7 @@ def main():
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
         bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
         bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_hole_2_width/2 + holder_hole_2_offset, -8.5, 0)), scale=(holder_hole_2_width, 10, 2*holder_hole_height + 1))
@@ -3911,7 +3911,7 @@ def main():
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside"]
         bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
         bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        #bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         #bottom extension
@@ -4152,13 +4152,13 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["maghole"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["mag_h"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.context.view_layer.objects.active = bpy.data.objects["maghole"]
@@ -4178,7 +4178,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["mag_h"]
-        bpy.context.object.modifiers["Boolean"].solver = 'FAST'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.context.view_layer.objects.active = bpy.data.objects["body"]
