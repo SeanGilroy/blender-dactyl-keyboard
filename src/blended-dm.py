@@ -1430,7 +1430,7 @@ def main():
         bpy.ops.mesh.select_all(action='DESELECT')
 
 
-
+    #print(xyz)
     
     for row in range(nrows-2):
         #Fill in between extended parts
@@ -1484,7 +1484,7 @@ def main():
         bpy.ops.mesh.edge_face_add()
         bpy.ops.mesh.select_all(action='DESELECT')
     
-
+    #print(xyz)
     
     #Clean Up vertex Groups
     bpy.ops.object.vertex_group_set_active(group="RAISE_2")
@@ -1514,7 +1514,7 @@ def main():
         bpy.ops.mesh.select_all(action='DESELECT')
 
 
-
+    #print(xyz)    
 
     bpy.ops.object.vertex_group_set_active(group="RAISE_2")
     bpy.ops.object.vertex_group_select()
@@ -1523,7 +1523,7 @@ def main():
     bpy.ops.object.vertex_group_assign()
     bpy.ops.mesh.separate(type="LOOSE")
     
-
+    #print(xyz)
     
     
     ###
@@ -1551,7 +1551,7 @@ def main():
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
     
-
+    #print(XYZ)
     
     
     ###
@@ -1748,7 +1748,7 @@ def main():
     '''
 
 
-
+    #print(xyz)
     
 
     ####################
@@ -2556,7 +2556,7 @@ def main():
             bpy.ops.mesh.subdivide(number_cuts=1, smoothness=0, ngon=True, quadcorner='INNERVERT')
             bpy.ops.mesh.select_all(action='DESELECT')
 
-
+    #print(xyz)
      
     
     '''
@@ -2582,7 +2582,7 @@ def main():
         
         ### IDEA make planes for sides from the corners + the top of the thumb.  three points make a plane
 
-
+    #print(xyz)
     
     # Fill in Rings
 
@@ -2954,7 +2954,18 @@ def main():
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
     bpy.data.objects["body"].select_set(True)
 
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
 
+    #print(xyz)
 
 
     for projection_type in [['body',       'keycap_projection_outer', mount_thickness + 2, 'all'       ],
@@ -2995,8 +3006,8 @@ def main():
         for thing in bpy.data.collections[projection_type[1].upper()].objects:
             print("    ---" + thing.name)
             vertex_group_name = thing.name
-            if "thumb" not in thing.name:
-                continue
+            #if "thumb" not in thing.name:
+            #    continue
                 
             bpy.context.scene.cursor.location = bpy.data.objects['axis' + thing.name[len(projection_type[1]):]].location
             bpy.context.scene.cursor.rotation_euler =  bpy.data.objects['axis' + thing.name[len(projection_type[1]):]].rotation_euler
@@ -3013,8 +3024,8 @@ def main():
                 
                 bpy.ops.object.modifier_add(type='BOOLEAN')
                 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
-                bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-                bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+                bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+                #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
                 #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
                 #bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
                 bpy.ops.object.modifier_apply(modifier="Boolean")
@@ -3052,7 +3063,7 @@ def main():
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.object.mode_set(mode = 'OBJECT')
             
-
+    #print(xyz)
 
     bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
     bpy.data.objects["body_bottom"].select_set(True)
@@ -3077,7 +3088,7 @@ def main():
     bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
     bpy.ops.object.select_all(action='DESELECT')
 
-
+    #print(xyz)
 
     bpy.ops.object.modifier_add(type='SHRINKWRAP')
     bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
@@ -3105,7 +3116,7 @@ def main():
     bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
 
-
+    #print(xyz)
 
     ###########################
     ##  Loligagger Formation ##
@@ -3559,7 +3570,7 @@ def main():
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
 
-
+    #print(xyz)
     
     bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
     bpy.ops.object.vertex_group_select()
@@ -4266,7 +4277,7 @@ def main():
         bpy.data.objects[object].select_set(True)
     with suppress_stdout(): bpy.ops.object.delete()
 
-
+    
 
     #########################
     ## Create Switch Holes ##
