@@ -117,7 +117,7 @@ def main():
 
 
     body_thickness = 2
-    body_subsurf_level = 2
+    body_subsurf_level = 4
     relaxed_mesh = True
     switch_support = True
     loligagger_port = True
@@ -188,8 +188,8 @@ def main():
     keyswitch_width = 14.4
     mount_thickness = 4
 
-    mount_height = keyswitch_height + 3
-    mount_width = keyswitch_width + 3
+    mount_height = keyswitch_height + 3 
+    mount_width = keyswitch_width + 3 
 
 
 
@@ -1073,8 +1073,8 @@ def main():
         bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.separate(type="LOOSE")
     
-   
-    
+
+
 
     #########################################
     ##  Lift Edges   ######
@@ -1373,10 +1373,10 @@ def main():
                 if column == 1: bpy.ops.transform.resize(value=(0.5, 0.5, 0.5), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
             else:
                 bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7 - (1-sin(alpha)/2)*column_offset(column)[1] + (column_offset(column)[2]/2) , depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+                #if column == 3: bpy.ops.transform.resize(value=(0.5, 0.5, 0.5), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
         else:
             bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, depth_mode='angle', angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
             if column == 4: bpy.ops.transform.resize(value=(0.5, 0.5, 0.5), orient_type='GLOBAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='GLOBAL', constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False, snap_elements={'INCREMENT'}, use_snap_project=False, snap_target='CLOSEST', use_snap_self=True, use_snap_edit=True, use_snap_nonedit=True, use_snap_selectable=False)
-
         bpy.ops.object.vertex_group_set_active(group='RAISE_2')
         bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -1551,7 +1551,7 @@ def main():
     bpy.ops.object.mode_set(mode = 'OBJECT')
     
     
-    #print(XYZ)
+
     
     
     ###
@@ -1670,8 +1670,7 @@ def main():
         
         bpy.ops.object.mode_set(mode = 'OBJECT')
     
-    
-    
+
     
 
     
@@ -1748,7 +1747,7 @@ def main():
     '''
 
 
-    #print(xyz)
+
     
 
     ####################
@@ -1899,7 +1898,7 @@ def main():
 
 
     # Bridge connection between plates
-    
+
     
 
     for bridge in ['BRIDGE_LEFT']:
@@ -2263,6 +2262,7 @@ def main():
     bpy.ops.mesh.select_all(action='DESELECT')
 
 
+
     # Construct Ring Skeleton
     for build_edge in [ ['finger_TOP',    [[wall_thickness, -1],
                                            [wall_xy_offset + wall_thickness, wall_z_offset], 
@@ -2296,6 +2296,15 @@ def main():
                 bpy.ops.object.vertex_group_set_active(group="switch - 0, " + str(cornerrow))
                 bpy.ops.object.vertex_group_deselect()
                 bpy.ops.object.vertex_group_set_active(group=build_edge[0])
+            if build_edge[0]=="finger_BOTTOM" and ring_num>0:
+                bpy.ops.object.vertex_group_set_active(group="switch - 3, " + str(nrows-1))
+                bpy.ops.object.vertex_group_deselect()
+                bpy.ops.object.vertex_group_set_active(group=build_edge[0])
+            if build_edge[0]=="thumb_RIGHT":
+                bpy.ops.object.vertex_group_set_active(group="switch - thumb - 5")
+                bpy.ops.object.vertex_group_deselect()
+                bpy.ops.object.vertex_group_set_active(group=build_edge[0])
+                #print(xyz)
             
             with suppress_stdout():
                 bpy.ops.mesh.offset_edges( width=build_edge[1][ring_num][0], depth=build_edge[1][ring_num][1], depth_mode='depth', follow_face=True, mirror_modifier=False, edge_rail=False, caches_valid=False)
@@ -2312,7 +2321,7 @@ def main():
         bpy.ops.object.vertex_group_select()
     bpy.ops.mesh.select_all(action='DESELECT')
 
-
+    #print(xyz)
 
     # Connect Rings
     #for corner in ['finger_corner_BL', 'finger_corner_TL', 'finger_corner_TR', 'finger_corner_BR', 'thumb_corner_BL', 'thumb_corner_BR', 'BRIDGE_RIGHT_RING_0']:
@@ -2460,7 +2469,7 @@ def main():
     bpy.ops.object.vertex_group_set_active(group='thumb_LEFT')
     bpy.ops.object.vertex_group_remove_from()
     bpy.ops.mesh.select_all(action='DESELECT')
-    
+
     
     # Construct Ring Skeleton
     for build_edge in [ ['finger_TOP',    [[wall_thickness, -1],
@@ -2507,6 +2516,18 @@ def main():
                 bpy.ops.object.vertex_group_deselect()
                 bpy.ops.object.vertex_group_set_active(group=build_edge[0])
             
+            '''if build_edge[0]=="finger_BOTTOM":
+                bpy.ops.object.vertex_group_set_active(group="switch - 3, " + str(nrows-1))
+                bpy.ops.object.vertex_group_deselect()
+                bpy.ops.object.vertex_group_set_active(group=build_edge[0])
+                #print(xyz)
+            if build_edge[0]=="thumb_RIGHT":
+                bpy.ops.object.vertex_group_set_active(group="switch - thumb - 5")
+                bpy.ops.object.vertex_group_deselect()
+                bpy.ops.object.vertex_group_set_active(group=build_edge[0])
+                #print(xyz)'''
+                
+            
             with suppress_stdout():
                 bpy.ops.mesh.offset_edges( width=build_edge[1][ring_num][0], depth=-build_edge[1][ring_num][1], depth_mode='depth', follow_face=True, mirror_modifier=False, edge_rail=False, caches_valid=False)
             bpy.ops.object.vertex_group_set_active(group='RING_' + str(ring_num+1))
@@ -2522,7 +2543,7 @@ def main():
             '''
             bpy.ops.mesh.select_all(action='DESELECT')
 
-
+    #print(xyz)
 
 
     # Connect Rings
@@ -2639,7 +2660,7 @@ def main():
     
   
 
-    
+
     
     ###########################
     ## Form Switch Locations ##
@@ -2729,12 +2750,13 @@ def main():
         bpy.data.objects["body"].select_set(True)
 
     elif (body_subsurf_level>0):
-        bpy.ops.object.mode_set(mode = 'EDIT')
+        '''bpy.ops.object.mode_set(mode = 'EDIT')
         bpy.ops.object.vertex_group_set_active(group='RAISE_1')
         bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_set_active(group='RAISE_2')
         bpy.ops.object.vertex_group_select()
         bpy.ops.transform.edge_crease(value=1, snap=False)
+        print(xyz)
         bpy.ops.mesh.select_all(action='DESELECT')
         
         bpy.ops.object.vertex_group_set_active(group='RAISE_2')
@@ -2742,7 +2764,7 @@ def main():
         bpy.ops.transform.edge_crease(value=-1, snap=False)
         bpy.ops.mesh.select_all(action='DESELECT')
         
-        bpy.ops.object.mode_set(mode = 'OBJECT')
+        bpy.ops.object.mode_set(mode = 'OBJECT')'''
 
         bpy.ops.object.modifier_add(type='SUBSURF')
         bpy.context.object.modifiers["Subdivision"].levels = body_subsurf_level
@@ -2938,7 +2960,7 @@ def main():
     bpy.ops.object.vertex_group_remove_from()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
+    '''
     bpy.ops.mesh.print3d_clean_non_manifold()
     bpy.ops.mesh.print3d_clean_non_manifold()
     bpy.ops.mesh.print3d_clean_non_manifold()
@@ -2946,8 +2968,22 @@ def main():
     bpy.ops.mesh.print3d_clean_non_manifold()
     bpy.ops.mesh.print3d_clean_non_manifold()
     bpy.ops.mesh.print3d_clean_non_manifold()
+    '''
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    
+    bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
+    bpy.data.objects["body_bottom"].select_set(True)
 
     bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body_bottom'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.edge_face_add()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
 
@@ -3020,14 +3056,12 @@ def main():
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.object.mode_set(mode = 'OBJECT') 
             
-            if projection_type[1] in ['switch_projection', 'keycap_projection_outer']:
+            #if projection_type[1] in ['switch_projection', 'keycap_projection_outer']:
+            if projection_type[1] in ['switch_projection']:
                 
                 bpy.ops.object.modifier_add(type='BOOLEAN')
                 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
                 bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
-                #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-                #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
-                #bpy.context.object.modifiers["Boolean"].double_threshold = 0.00001
                 bpy.ops.object.modifier_apply(modifier="Boolean")
             
                 bpy.ops.object.mode_set(mode = 'EDIT')
@@ -3054,6 +3088,13 @@ def main():
                 bpy.data.objects["Plane"].select_set(True)
                 with suppress_stdout(): bpy.ops.object.delete()
             
+            if projection_type[1] in ['keycap_projection_outer']:
+                
+                bpy.ops.object.modifier_add(type='BOOLEAN')
+                bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
+                bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+                bpy.ops.object.modifier_apply(modifier="Boolean")
+            
             bpy.ops.object.mode_set(mode = 'EDIT')
           
             bpy.ops.mesh.select_all(action='SELECT')
@@ -3063,7 +3104,7 @@ def main():
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.object.mode_set(mode = 'OBJECT')
             
-    #print(xyz)
+
 
     bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
     bpy.data.objects["body_bottom"].select_set(True)
@@ -3166,9 +3207,7 @@ def main():
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             bpy.ops.object.modifier_add(type='BOOLEAN')
             bpy.context.object.modifiers["Boolean"].operation = 'INTERSECT'
-            bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-            #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+            bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["body"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
 
@@ -3182,9 +3221,7 @@ def main():
             bpy.data.objects["body"].select_set(True)
             bpy.ops.object.modifier_add(type='BOOLEAN')
             bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
-            bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-            #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+            bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
             bpy.ops.object.mode_set(mode = 'EDIT')
@@ -3233,9 +3270,7 @@ def main():
             bpy.data.objects["body_bottom"].select_set(True)
             bpy.ops.object.modifier_add(type='BOOLEAN')
             bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
-            bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-            #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+            bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
             bpy.ops.object.modifier_apply(modifier="Boolean")
             bpy.ops.object.mode_set(mode = 'EDIT')
@@ -3303,7 +3338,7 @@ def main():
         bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RAISE_0"
         bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
-    
+
 
     ####################################
     ## Join Inner and Outer Body Mesh ##
@@ -3320,14 +3355,18 @@ def main():
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects['body']
     bpy.data.objects['body'].select_set(True)
-    
+    '''
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.mesh.select_non_manifold()
     bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.print3d_clean_non_manifold()
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.mesh.print3d_clean_non_manifold()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
+    '''
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
     bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
@@ -3357,25 +3396,28 @@ def main():
     bpy.data.objects['body_bottom'].select_set(True)
     
     
-
+    
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.mesh.select_non_manifold()
-    bpy.ops.mesh.edge_face_add()
+    bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+    bpy.ops.object.vertex_group_select()
+    bpy.ops.object.vertex_group_remove_from()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
+    
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["cut_cube"]
     bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
     bpy.ops.object.modifier_apply(modifier="Boolean")
-
+    
 
     bpy.ops.object.mode_set(mode = 'EDIT')
+    
     bpy.ops.object.vertex_group_assign_new()
     bpy.data.objects['body_bottom'].vertex_groups['Group'].name = 'bottom_non_manifold'
     bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
     bpy.ops.object.vertex_group_assign()
+
     if seperate_plate_from_body:
         bpy.ops.object.vertex_group_set_active(group="RAISE_1")
         bpy.ops.object.vertex_group_select()
@@ -3383,7 +3425,6 @@ def main():
     if seperate_plate_from_body:
         bpy.ops.object.vertex_group_set_active(group="RAISE_1")
         bpy.ops.object.vertex_group_deselect()
-    
 
     bpy.ops.object.vertex_group_set_active(group="all_inside")
     bpy.ops.object.vertex_group_select()
@@ -3394,6 +3435,7 @@ def main():
     bpy.ops.transform.translate(value=(-0, -0, -bottom_thickness+0.1), constraint_axis=(True, True, True), mirror=True, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
     
     bpy.ops.object.mode_set(mode = 'OBJECT')
+    
     bpy.ops.object.modifier_add(type='SHRINKWRAP')
     bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'PROJECT'
     bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
@@ -3428,7 +3470,7 @@ def main():
     bpy.data.objects['cut_cube'].select_set(True)
     bpy.ops.transform.translate(value=(0, 0, -bottom_thickness), constraint_axis=(True, True, True), mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', proportional_size=1, use_proportional_connected=False, use_proportional_projected=False)
 
-
+    
 
     if loligagger_port:
         bpy.ops.object.select_all(action='DESELECT')
@@ -3551,7 +3593,6 @@ def main():
     bpy.ops.mesh.select_all(action='DESELECT')
 
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
 
     
 
