@@ -110,7 +110,7 @@ def main():
     ## Shell Parameters and Features ##
     ###################################
 
-    geode_mode = False                # Forces other perameters
+    geode_mode = True                # Forces other perameters
     geode_ratio = 0.1              # Good values ~0.05-0.2
     geode_offset = 0.5
     geode_seed = 0
@@ -2722,8 +2722,15 @@ def main():
         bpy.ops.object.vertex_group_deselect()
         bpy.ops.object.vertex_group_set_active(group="key_thumb")
         bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group="RAISE_0")
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group="RAISE_1")
+        bpy.ops.object.vertex_group_deselect()
+        bpy.ops.object.vertex_group_set_active(group="RAISE_2")
+        bpy.ops.object.vertex_group_deselect()
         bpy.ops.object.vertex_group_set_active(group="RING_0")
         bpy.ops.object.vertex_group_select()
+
 
         for x in range(1):
             bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
@@ -2778,22 +2785,7 @@ def main():
     bpy.data.objects['body'].vertex_groups['Group'].name = "all"
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
-
-    bpy.ops.object.select_all(action='DESELECT')
-    bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
-    bpy.data.objects["body_inner"].select_set(True)
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
-    if (body_subsurf_level>0):
-        bpy.ops.object.modifier_add(type='SUBSURF')
-        if (body_subsurf_level<=3):
-            bpy.context.object.modifiers["Subdivision"].levels = body_subsurf_level
-        else:
-            bpy.context.object.modifiers["Subdivision"].levels = 3
-        bpy.ops.object.modifier_apply(modifier="Subdivision")
-        
-    '''
+    
     bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
     bpy.data.objects["body_bottom"].select_set(True)
     
@@ -2821,7 +2813,34 @@ def main():
     bpy.ops.mesh.edge_face_add()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-    '''
+
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
+    bpy.data.objects["body_inner"].select_set(True)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body_inner'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+
+    if (body_subsurf_level>0):
+        bpy.ops.object.modifier_add(type='SUBSURF')
+        if (body_subsurf_level<=3):
+            bpy.context.object.modifiers["Subdivision"].levels = body_subsurf_level
+        else:
+            bpy.context.object.modifiers["Subdivision"].levels = 3
+        bpy.ops.object.modifier_apply(modifier="Subdivision")
+        
+    
+
+    
     
     if geode_mode:
         
@@ -2838,10 +2857,10 @@ def main():
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.object.vertex_group_assign_new()
-        bpy.data.objects['body'].vertex_groups['Group'].name = 'bottom_non_manifold'
+        bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+        bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_assign()
-        bpy.ops.mesh.delete(type='FACE')
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode = 'OBJECT')
         
         bpy.ops.object.select_all(action='DESELECT')
@@ -2854,10 +2873,10 @@ def main():
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.ops.object.mode_set(mode = 'EDIT')
-        bpy.ops.object.vertex_group_assign_new()
-        bpy.data.objects['body_inner'].vertex_groups['Group'].name = 'bottom_non_manifold'
+        bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+        bpy.ops.object.vertex_group_select()
         bpy.ops.object.vertex_group_assign()
-        bpy.ops.mesh.delete(type='FACE')
+        bpy.ops.mesh.select_all(action='DESELECT')
         bpy.ops.object.mode_set(mode = 'OBJECT')
         
         bpy.ops.object.select_all(action='DESELECT')
@@ -2886,6 +2905,7 @@ def main():
             bpy.ops.mesh.select_all(action='DESELECT')
             bpy.ops.object.mode_set(mode = 'OBJECT')
             offset+=offset_increment
+
 
 
 
@@ -2936,6 +2956,7 @@ def main():
         bpy.context.object.modifiers["Shrinkwrap"].offset = -0.2
         bpy.context.object.modifiers["Shrinkwrap"].cull_face = 'BACK'
         bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+
 
     bpy.ops.object.select_all(action='DESELECT')
     bpy.context.view_layer.objects.active = bpy.data.objects["body_inner"]
@@ -3000,7 +3021,7 @@ def main():
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-    
+    '''
     bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
     bpy.data.objects["body_bottom"].select_set(True)
 
@@ -3014,10 +3035,10 @@ def main():
     bpy.ops.mesh.edge_face_add()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
+    '''
     bpy.context.view_layer.objects.active = bpy.data.objects["body"]
     bpy.data.objects["body"].select_set(True)
-
+    '''
     bpy.ops.object.mode_set(mode = 'EDIT')
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.vertex_group_assign_new()
@@ -3028,7 +3049,7 @@ def main():
     bpy.ops.mesh.edge_face_add()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-    
+    '''
     #print(xyz)
 
 
@@ -3181,6 +3202,25 @@ def main():
     bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
     #bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
     bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+    bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_1"
+    bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+    
+    bpy.ops.object.modifier_add(type='SHRINKWRAP')
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+    #bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+    bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_2"
+    bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+    
+    bpy.ops.object.modifier_add(type='SHRINKWRAP')
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+    #bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+    bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_3"
     bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
     bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
