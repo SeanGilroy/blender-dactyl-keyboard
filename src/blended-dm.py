@@ -117,7 +117,7 @@ def main():
 
 
     body_thickness = 2
-    body_subsurf_level = 4
+    body_subsurf_level = 5
     relaxed_mesh = True
     switch_support = True
     loligagger_port = True
@@ -2792,9 +2792,37 @@ def main():
         else:
             bpy.context.object.modifiers["Subdivision"].levels = 3
         bpy.ops.object.modifier_apply(modifier="Subdivision")
-
-
         
+    '''
+    bpy.context.view_layer.objects.active = bpy.data.objects["body_bottom"]
+    bpy.data.objects["body_bottom"].select_set(True)
+    
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body_bottom'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+
+    bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+    bpy.data.objects["body"].select_set(True)
+
+    bpy.ops.object.mode_set(mode = 'EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.vertex_group_assign_new()
+    bpy.data.objects['body'].vertex_groups['Group'].name = 'bottom_non_manifold'
+    bpy.ops.object.vertex_group_set_active(group="bottom_non_manifold")
+    bpy.ops.mesh.select_non_manifold()
+    bpy.ops.object.vertex_group_assign()
+    bpy.ops.mesh.edge_face_add()
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode = 'OBJECT')
+    '''
+    
     if geode_mode:
         
         bpy.ops.mesh.primitive_cube_add(size=400, enter_editmode=False, align='WORLD', location=(0, 0, -200 - 30), scale=(1, 1, 1))
@@ -3000,7 +3028,7 @@ def main():
     bpy.ops.mesh.edge_face_add()
     bpy.ops.mesh.select_all(action='DESELECT')
     bpy.ops.object.mode_set(mode = 'OBJECT')
-
+    
     #print(xyz)
 
 
@@ -3935,9 +3963,9 @@ def main():
         bpy.data.objects["body"].select_set(True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
-        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((holder_hole_2_width/2 + holder_hole_2_offset, -8.5, 0)), scale=(holder_hole_2_width, 10, 2*holder_hole_height + 1))
@@ -3961,9 +3989,9 @@ def main():
         bpy.data.objects["body"].select_set(True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside"]
-        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        #bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         #bottom extension
@@ -3991,7 +4019,8 @@ def main():
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_bottom_2"]
         #bpy.context.object.modifiers["Boolean"].use_self = True
         #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector(((holder_hole_width-0.4)/2 + holder_hole_offset + 0.2, -10, -(bottom_thickness-0.5)/2 - 0.5)), scale=(holder_hole_width-0.4, 20, bottom_thickness-0.02-0.5))
@@ -4005,7 +4034,8 @@ def main():
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_bottom_1"]
         #bpy.context.object.modifiers["Boolean"].use_self = True
         #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         
@@ -4205,12 +4235,14 @@ def main():
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["maghole"]
         bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'DIFFERENCE'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["mag_h"]
         bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.context.view_layer.objects.active = bpy.data.objects["maghole"]
@@ -4308,7 +4340,8 @@ def main():
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operation = 'UNION'
     bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["bottom_stopper"]
-    bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
+    bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
 
@@ -4334,7 +4367,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
         bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
-        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
         bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE"]
         bpy.ops.object.modifier_apply(modifier="Boolean")
     
@@ -4344,7 +4377,7 @@ def main():
     bpy.ops.object.modifier_add(type='BOOLEAN')
     bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
     bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
-    bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+    #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
     bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE"]
     bpy.ops.object.modifier_apply(modifier="Boolean")
 
