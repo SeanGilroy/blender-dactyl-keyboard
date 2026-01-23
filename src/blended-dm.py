@@ -110,7 +110,7 @@ def main():
     ## Shell Parameters and Features ##
     ###################################
 
-    geode_mode = True                # Forces other perameters
+    geode_mode = False                # Forces other perameters
     geode_ratio = 0.1              # Good values ~0.05-0.2
     geode_offset = 0.5
     geode_seed = 0
@@ -1074,7 +1074,7 @@ def main():
         bpy.ops.mesh.separate(type="LOOSE")
     
 
-
+    
 
     #########################################
     ##  Lift Edges   ######
@@ -1293,9 +1293,10 @@ def main():
         bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.separate(type="LOOSE")
         
+    #bpy.context.scene.cursor.location = bpy.data.objects['axis - 3, 4'].location
+    #bpy.context.scene.cursor.rotation_euler =  bpy.data.objects['axis - 3, 4'].rotation_euler
 
-
-
+    #print(xyz)
 
     
     
@@ -1424,7 +1425,7 @@ def main():
 
         
         #Extrude Border
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-15, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
         bpy.ops.object.vertex_group_set_active(group='RAISE_2')
         bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -1468,7 +1469,7 @@ def main():
 
         
         #Extrude Border
-        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-15, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
+        bpy.ops.mesh.offset_edges(geometry_mode='extrude', width=-7, angle=1.5708, follow_face=True, caches_valid=False, angle_presets='90°')
         bpy.ops.object.vertex_group_set_active(group='RAISE_2')
         bpy.ops.object.vertex_group_assign()
         bpy.ops.mesh.select_all(action='DESELECT')
@@ -3223,6 +3224,15 @@ def main():
     bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RING_3"
     bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
     bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
+    
+    bpy.ops.object.modifier_add(type='SHRINKWRAP')
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'TARGET_PROJECT'
+    bpy.context.object.modifiers["Shrinkwrap"].wrap_mode = 'INSIDE'
+    #bpy.context.object.modifiers["Shrinkwrap"].wrap_method = 'NEAREST_SURFACEPOINT'
+    bpy.context.object.modifiers["Shrinkwrap"].target = bpy.data.objects["body"]
+    bpy.context.object.modifiers["Shrinkwrap"].vertex_group = "RAISE_2"
+    bpy.context.object.modifiers["Shrinkwrap"].offset = body_thickness
+    bpy.ops.object.modifier_apply(modifier="Shrinkwrap")
 
 
     #print(xyz)
@@ -3743,6 +3753,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
 
@@ -3757,6 +3768,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside_1"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
         
@@ -3783,6 +3795,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_inside_2"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         
@@ -3800,6 +3813,7 @@ def main():
 
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_1"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((22.15, -22.4, 11.6)), scale=(18.8, 33.5, holder_hole_height+5))
@@ -3812,6 +3826,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_2"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         
@@ -3837,6 +3852,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_3"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         
@@ -3850,6 +3866,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_4"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((4.15, -13.75, 6.925)), scale=(2.2, 16, holder_hole_height))
@@ -3866,6 +3883,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_cutaway_5"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((22.2, 4.25, 4.5)), scale=(13, 16, 8))
@@ -3883,6 +3901,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_usb_1"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
 
@@ -3901,6 +3920,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_usb_2"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
 
@@ -3914,6 +3934,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_usb_3"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
 
 
@@ -3932,6 +3953,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_trrs_1"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cube_add(size=1, location=bpy.data.objects['holder_projection'].location + mathutils.Vector((7.275, -19.425, 4)), scale=(4, 2.575, 7.))
@@ -3957,6 +3979,7 @@ def main():
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].operation = 'UNION'
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_trrs_2"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.mesh.primitive_cylinder_add(radius=2.6, depth=3, enter_editmode=False, align='WORLD', location=bpy.data.objects['holder_projection'].location + mathutils.Vector((7.275, -5, 6.4)), rotation=(1.5708, 0, 0), scale=(1, 1, 1))
@@ -3969,6 +3992,7 @@ def main():
         
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_trrs_3"]
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
         bpy.ops.object.select_all(action='DESELECT')
@@ -4003,8 +4027,6 @@ def main():
         bpy.data.objects["body"].select_set(True)
         bpy.ops.object.modifier_add(type='BOOLEAN')
         bpy.context.object.modifiers["Boolean"].object = bpy.data.objects["holder_outside"]
-        #bpy.context.object.modifiers["Boolean"].solver = 'EXACT'
-        #bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
         bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
         bpy.ops.object.modifier_apply(modifier="Boolean")
         
