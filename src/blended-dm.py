@@ -3291,11 +3291,11 @@ def main():
 
 
     for projection_type in [['body',       'keycap_projection_outer', mount_thickness + 2, 'all'       ],
-                            ['body',       'switch_projection'      , mount_thickness,     'all'       ]]:#,
-                            #['body_bottom', 'keycap_projection_inner', mount_thickness,     'all_inside']]:#,
+                            ['body',       'switch_projection'      , mount_thickness,     'all'       ],#]:#,
+                            ['body_bottom', 'keycap_projection_inner', mount_thickness,     'all_inside']]:#,
                             #['body_bottom', 'switch_projection_inner', amoeba_position[2],  'all_inside']]:
         
-        if projection_type[1] in ['keycap_projection_inner', 'switch_projection_inner']:
+        if projection_type[1] in [ 'switch_projection_inner']:
             bpy.ops.object.select_all(action='DESELECT')
             bpy.ops.object.mode_set(mode = 'EDIT')
             bpy.ops.mesh.select_all(action='DESELECT')
@@ -3374,7 +3374,7 @@ def main():
                 bpy.data.objects["Plane"].select_set(True)
                 with suppress_stdout(): bpy.ops.object.delete()
             
-            if projection_type[1] in ['keycap_projection_outer']:
+            if projection_type[1] in ['keycap_projection_outer', 'keycap_projection_inner']:
                 
                 bpy.ops.object.modifier_add(type='BOOLEAN')
                 bpy.context.object.modifiers["Boolean"].object = bpy.data.objects[thing.name]
