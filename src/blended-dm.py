@@ -1,4 +1,5 @@
 import bpy
+import addon_utils
 import bmesh
 import os
 import sys
@@ -19,6 +20,7 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
+    
 def main():
 
     #######################################
@@ -41,11 +43,10 @@ def main():
     bpy.context.scene.unit_settings.length_unit = 'MILLIMETERS'
     bpy.context.scene.cursor.location =  [0, 0, 0]
     bpy.context.scene.cursor.rotation_euler =  [0, 0, 0]
-    bpy.ops.extensions.userpref_allow_online()
-    bpy.ops.extensions.package_install(repo_index=0, pkg_id="edit_mesh_tools")
-    bpy.ops.extensions.package_install(repo_index=0, pkg_id="print3d_toolbox")
+    #bpy.ops.extensions.package_install(repo_index=0, pkg_id="edit_mesh_tools")
+    #bpy.ops.extensions.package_install(repo_index=0, pkg_id="print3d_toolbox")
 
-
+   
 
     start_time = time.time()
 
@@ -120,6 +121,7 @@ def main():
     body_subsurf_level = 2
     relaxed_mesh = True
     switch_support = True
+    switch_hole_lower = True
     loligagger_port = True
     wide_pinky = True
     lift_for_z_clearence = True       # Lifts the whole keyboard to prevent clipping for z<0 
@@ -4681,32 +4683,6 @@ def main():
 
     bpy.ops.mesh.print3d_clean_non_manifold()
     
-    print("{:.2f}".format(time.time()-start_time), "- Add Switch Hole Lower Cuts")
-
-    if seperate_plate_from_body:
-        bpy.context.view_layer.objects.active = bpy.data.objects["seperated_finger_plate"]
-        bpy.data.objects['seperated_finger_plate'].select_set(True)
-        bpy.ops.object.modifier_add(type='BOOLEAN')
-        bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
-        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
-        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-        bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE_LOWER"]
-        bpy.ops.object.modifier_apply(modifier="Boolean")
-    
-    bpy.context.view_layer.objects.active = bpy.data.objects["body"]
-    bpy.data.objects['body'].select_set(True)
-
-    bpy.ops.object.modifier_add(type='BOOLEAN')
-    bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
-    bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
-    bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
-    bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE_LOWER"]
-    bpy.ops.object.modifier_apply(modifier="Boolean")
-
-    bpy.ops.mesh.print3d_clean_non_manifold()
-
-
-
 
     ########################
     ## Create Ameoba Cuts ##
@@ -4773,6 +4749,37 @@ def main():
             bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
             bpy.context.object.modifiers["Boolean"].object = support
             bpy.ops.object.modifier_apply(modifier="Boolean")
+    
+    
+    
+    #########################
+    ## Add Switch Hole Lower ##
+    #########################
+
+    if switch_hole_lower:
+        print("{:.2f}".format(time.time()-start_time), "- Add Switch Hole Lower Cuts")
+
+        if seperate_plate_from_body:
+            bpy.context.view_layer.objects.active = bpy.data.objects["seperated_finger_plate"]
+            bpy.data.objects['seperated_finger_plate'].select_set(True)
+            bpy.ops.object.modifier_add(type='BOOLEAN')
+            bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+            bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+            bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+            bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE_LOWER"]
+            bpy.ops.object.modifier_apply(modifier="Boolean")
+        
+        bpy.context.view_layer.objects.active = bpy.data.objects["body"]
+        bpy.data.objects['body'].select_set(True)
+
+        bpy.ops.object.modifier_add(type='BOOLEAN')
+        bpy.context.object.modifiers["Boolean"].operand_type = 'COLLECTION'
+        bpy.context.object.modifiers["Boolean"].solver = 'MANIFOLD'
+        bpy.context.object.modifiers["Boolean"].use_hole_tolerant = True
+        bpy.context.object.modifiers["Boolean"].collection = bpy.data.collections["SWITCH_HOLE_LOWER"]
+        bpy.ops.object.modifier_apply(modifier="Boolean")
+
+        bpy.ops.mesh.print3d_clean_non_manifold()
 
 
     ##############
